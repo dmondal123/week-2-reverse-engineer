@@ -1,82 +1,42 @@
 [
-    {
-    
+  {
     "case_id": "multi_fact_wifi",
-    
     "query": "Can contractors expense hotel Wi-Fi and when is approval required?",
-    
     "relevant_source_ids": ["travel-wifi-current", "contractor-scope", "approval-matrix"],
-    
     "forbidden_source_ids": ["finance-memo-obsolete"],
-    
     "required_phrases": ["contractors", "statement of work", "$50"],
-    
     "corpus_version": "v1"
-    
-    },
-    
-    {
-    
+  },
+  {
     "case_id": "exact_identifier_ap50",
-    
     "query": "What does Rule ID AP-50 require?",
-    
     "relevant_source_ids": ["approval-matrix"],
-    
     "forbidden_source_ids": ["finance-memo-obsolete"],
-    
     "required_phrases": ["manager approval", "above $50"],
-    
     "corpus_version": "v1"
-    
-    },
-    
-    {
-    
+  },
+  {
     "case_id": "semantic_travel_connectivity",
-    
     "query": "How much can an employee reclaim for wireless access at a hotel on a work trip?",
-    
     "relevant_source_ids": ["travel-wifi-current"],
-    
     "forbidden_source_ids": ["finance-memo-obsolete", "device-security"],
-    
     "required_phrases": ["$25", "hotel Wi-Fi"],
-    
     "corpus_version": "v1"
-    
-    },
-    
-    {
-    
+  },
+  {
     "case_id": "obsolete_source_trap",
-    
     "query": "What is the current daily hotel internet reimbursement limit? Do not use a retired memo.",
-    
     "relevant_source_ids": ["travel-wifi-current"],
-    
     "forbidden_source_ids": ["finance-memo-obsolete"],
-    
     "required_phrases": ["$25", "current"],
-    
     "corpus_version": "v1"
-    
-    },
-    
-    {
-    
+  },
+  {
     "case_id": "version_change_wifi_limit",
-    
     "query": "Under corpus version 2, what is the daily limit for hotel Wi-Fi on approved business travel?",
-    
     "relevant_source_ids": ["travel-wifi-current"],
-    
     "forbidden_source_ids": ["finance-memo-obsolete"],
-    
     "required_phrases": ["$30", "2026-07-01"],
-    
     "corpus_version": "v2"
-    
-    }
-    ]
-    
+  }
+]

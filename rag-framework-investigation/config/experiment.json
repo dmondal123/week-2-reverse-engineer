@@ -15,7 +15,7 @@
     "top_k": 5,
     "score_order": "descending",
     "tie_break_rule": "score_desc_then_chunk_id_asc",
-    "metadata_filter": {"status": "current_or_obsolete_as_indexed"}
+    "metadata_filter": {"field": "status", "allowed_values": ["current", "obsolete"], "note": "retrieval indexes both statuses so the obsolete-source trap is answerable; forbidden sources are excluded at citation scoring via eval-case forbidden_source_ids"}
   },
   "reranking": {
     "enabled": false,
