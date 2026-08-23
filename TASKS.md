@@ -248,7 +248,7 @@ Include one multi-fact case, one exact identifier, one semantic paraphrase, one 
 
 `config/experiment.json` must explicitly name chunk size/overlap, top-k, rerank-k, context budget, stable tie-break rule, embedding model, generation model, temperature 0, prompt hash, and active `release_id`. No framework default that can affect results may remain implicit.
 
-- [ ] **Step 7: Verify and commit**
+- [x] **Step 7: Verify and commit**
 
 Run JSON parsing and SHA-256 checks over every corpus/config/eval file. Confirm v1 has six files and v2 has five. Commit:
 
