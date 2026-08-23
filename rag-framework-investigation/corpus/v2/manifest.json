@@ -1,0 +1,62 @@
+{
+  "schema_version": 2,
+  "corpus_version": "v2",
+  "derived_from": "v1",
+  "document_count": 5,
+  "removed_source_ids": [
+    "office-snacks"
+  ],
+  "identity_contract": {
+    "encoding": "utf-8",
+    "document_id_rule": "sha256('document' + U+001F + source_id + U+001F + content_sha256)",
+    "chunk_id_rule": "sha256('chunk' + U+001F + document_id + U+001F + start + U+001F + end + U+001F + chunk_text)"
+  },
+  "chunk_plan": "one whole-document chunk per source; each source is below the configured 200-token window",
+  "documents": [
+    {
+      "source_id": "approval-matrix",
+      "path": "v2/approval-matrix.md",
+      "content_sha256": "a3c21e3bcf03699fa710d6bc826cb0c4035546e4b1b46fe934390e8edca8b774",
+      "document_id": "47085649d87ca2d30a8b228c8da01a977ed169380cd9d4f9c5a0326b052b9af8",
+      "chunk_ids": [
+        "08a062497be27c99a5f51aa2cc151b9610e32eba184b8e4837d722530b7533d5"
+      ]
+    },
+    {
+      "source_id": "contractor-scope",
+      "path": "v2/contractor-scope.md",
+      "content_sha256": "e37e929a6e33b96bf01e6559732b4e5c70d92a0ef0c8a447614c1fdbf22a56d9",
+      "document_id": "050679f92471041ff04896da85682ac98bda68a7a0492d4d962855ff52f1e25e",
+      "chunk_ids": [
+        "3ce2f0dccda63ecb89d0d786664fc30e4bad0d037127df01e9e65cdebf620d24"
+      ]
+    },
+    {
+      "source_id": "device-security",
+      "path": "v2/device-security.md",
+      "content_sha256": "ac817680d656142f72c5a22d1d66efc5a146c7aeb0810bd6d5fa8b47378ec2d0",
+      "document_id": "e5ecf2691fdf38e09b5c6653700d85cd02b7bcdb78a64a233719d3cfa0e52817",
+      "chunk_ids": [
+        "8e82cebfc42118ae55dd1ed9c4cc272b4e04e1d6bfd40d371fb32d8af7d068a4"
+      ]
+    },
+    {
+      "source_id": "finance-memo-obsolete",
+      "path": "v2/finance-memo-obsolete.md",
+      "content_sha256": "f578eee6d5ad5f6e6a296aeb82cc649393ceb01a327bcc12b4b8ae29dc12fecc",
+      "document_id": "c4b68a77544b0f023497891747ddd378a296339e07c0ed8aacea5825b82d4de6",
+      "chunk_ids": [
+        "ab8b823396c208deb383f08ee594afc87220615d9155f657f715ca204459183d"
+      ]
+    },
+    {
+      "source_id": "travel-wifi-current",
+      "path": "v2/travel-wifi-current.md",
+      "content_sha256": "5c97eeb468c1e52bb25c68ce0d3690236c93c889e6c617e9ead1b7a84acdb80b",
+      "document_id": "5bed7bc86a99f18f9b122e307a24835776ea757fc792b855ac389d01888b9de0",
+      "chunk_ids": [
+        "636977865bc7c870fc9ce2dc9ad08d66afb89d0a70020e273da25ea6a51677a4"
+      ]
+    }
+  ]
+}

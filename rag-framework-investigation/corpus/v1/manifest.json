@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "corpus_version": "v1",
+  "document_count": 6,
+  "identity_contract": {
+    "encoding": "utf-8",
+    "document_id_rule": "sha256('document' + U+001F + source_id + U+001F + content_sha256)",
+    "chunk_id_rule": "sha256('chunk' + U+001F + document_id + U+001F + start + U+001F + end + U+001F + chunk_text)"
+  },
+  "chunk_plan": "one whole-document chunk per source; each source is below the configured 200-token window",
+  "documents": [
+    {
+      "source_id": "approval-matrix",
+      "path": "v1/approval-matrix.md",
+      "content_sha256": "70a949a1731f5b650ca7b0269748e742033d35b1a02c0ea903013c6512343967",
+      "document_id": "b3ad1862e34aba62ac605dd86f1cf5496dd84b9d20ab2abbf7c0470114dae61e",
+      "chunk_ids": [
+        "bd8c5a965dbd5cf2bba611b2fa0d7f0a440b3765f0915807bc9325c8d3c1bdb8"
+      ]
+    },
+    {
+      "source_id": "contractor-scope",
+      "path": "v1/contractor-scope.md",
+      "content_sha256": "18c59cac99ff313e429fa217e57ee6fe058582dd77ac54d46e9e5de47da11cac",
+      "document_id": "b096d956b33fec8dad322a18b42a77995483f1709b6d997e05c590122c97e16f",
+      "chunk_ids": [
+        "d96c28f96ea17df6444fac515bb0d58e6101881ecf5caa2e3ea12c675d4a70a4"
+      ]
+    },
+    {
+      "source_id": "device-security",
+      "path": "v1/device-security.md",
+      "content_sha256": "c37f075d0600145578388714a0029253dd1d772cd343c3a56e05fc8c03e727f8",
+      "document_id": "1598211be5a23c3b648be40334163d21776729a8b9ee9b750caed96b248976d9",
+      "chunk_ids": [
+        "58469b74f2167a82c01a6693510da128a9bde89c97f961f32754e8804f734afe"
+      ]
+    },
+    {
+      "source_id": "finance-memo-obsolete",
+      "path": "v1/finance-memo-obsolete.md",
+      "content_sha256": "898ca1049e268916823c7fb356bd3b285fe3109b4c7f55931a922fe0fdcb2a04",
+      "document_id": "c65ee380126768313c327a329444187ae74b24a4e870276a2f87388c8de5a974",
+      "chunk_ids": [
+        "592fdc1df0212f4cc89e9a30d2ae48c35380ad286184cf2747ee44f816a64b5a"
+      ]
+    },
+    {
+      "source_id": "office-snacks",
+      "path": "v1/office-snacks.md",
+      "content_sha256": "15cd7a4e29e6dfaa98074db11f05d5c6d67d2dc889d261160f78e0f2dec21b13",
+      "document_id": "ae6541d20498cadedc6f6146193d7ac59fa60d9953d2a417bea67cfada88a4ce",
+      "chunk_ids": [
+        "66d232fdba1ae9079254b5749e1aefeeeebf484e36da8d94410ace40576e77f0"
+      ]
+    },
+    {
+      "source_id": "travel-wifi-current",
+      "path": "v1/travel-wifi-current.md",
+      "content_sha256": "3f952dcfca07066380e0df55c8ab1d1ac9571ff2a46c6298e4e44167c1024acb",
+      "document_id": "df1561d92d153dfa816903979ceb947eec990fb33a7da75763a4c29095387650",
+      "chunk_ids": [
+        "0fdf0359a182656d06272d2cc6301ad8177be888a7727ce2d8c760ddd2febac2"
+      ]
+    }
+  ]
+}
