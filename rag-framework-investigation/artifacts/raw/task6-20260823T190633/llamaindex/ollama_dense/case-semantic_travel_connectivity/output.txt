@@ -1,0 +1,1 @@
+An employee can reclaim up to $25 per travel day for wireless access at a hotel on a work trip. This amount is specified in source_id=travel-wifi-current.

@@ -1,0 +1,57 @@
+[
+  {
+    "position": 1,
+    "source_id": "travel-wifi-current",
+    "document_id": "5bed7bc86a99f18f9b122e307a24835776ea757fc792b855ac389d01888b9de0",
+    "chunk_id": "83451783800288f0971810d8a882e56dc40c722f103df2533e9a1321650a9366",
+    "span": [
+      166,
+      360
+    ],
+    "release_id": "v2"
+  },
+  {
+    "position": 2,
+    "source_id": "finance-memo-obsolete",
+    "document_id": "c4b68a77544b0f023497891747ddd378a296339e07c0ed8aacea5825b82d4de6",
+    "chunk_id": "db0a6c8c8c3236759d34b2a933d955ec9431d8a8eded8af4a877887fb73673f3",
+    "span": [
+      164,
+      339
+    ],
+    "release_id": "v2"
+  },
+  {
+    "position": 3,
+    "source_id": "approval-matrix",
+    "document_id": "47085649d87ca2d30a8b228c8da01a977ed169380cd9d4f9c5a0326b052b9af8",
+    "chunk_id": "b86ad6e62dafb1ad0f45a95ed7b8db46f77fd2b3d757437d4ab3da49b3ff5bb5",
+    "span": [
+      150,
+      308
+    ],
+    "release_id": "v2"
+  },
+  {
+    "position": 4,
+    "source_id": "device-security",
+    "document_id": "e5ecf2691fdf38e09b5c6653700d85cd02b7bcdb78a64a233719d3cfa0e52817",
+    "chunk_id": "62d49dfb1a047e046a6e70d2aad6d7a9c9114289baaa46fb70b6c15bdd95d197",
+    "span": [
+      161,
+      317
+    ],
+    "release_id": "v2"
+  },
+  {
+    "position": 5,
+    "source_id": "contractor-scope",
+    "document_id": "050679f92471041ff04896da85682ac98bda68a7a0492d4d962855ff52f1e25e",
+    "chunk_id": "689b034102af3965d34f5f1213fbf76fae2c6ee8a7a99e75c4be53b2c55101a9",
+    "span": [
+      152,
+      378
+    ],
+    "release_id": "v2"
+  }
+]

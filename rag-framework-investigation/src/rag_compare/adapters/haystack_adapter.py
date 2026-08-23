@@ -51,6 +51,7 @@ class HaystackAdapter(BaseAdapter):
         super().__init__(*args, **kwargs)
         # release_id namespace -> {"store": InMemoryDocumentStore}
         self._stores: dict[str, dict] = {}
+        self._latest_vectors: list[list[float]] = []
 
     def adapter_name(self) -> str:
         return "haystack_adapter"
@@ -72,14 +73,22 @@ class HaystackAdapter(BaseAdapter):
         release_id = str(manifest["corpus_version"])
 
         def embed_stage(chunks, rid):
-            return self._embed_chunks(chunks, rid, trace)
+            result = self._embed_chunks(chunks, rid, trace)
+            # Vectors are needed again at store time to attach embeddings to
+            # the Haystack documents (dense retrieval requires them).
+            self._latest_vectors = result.vectors
+            return result
 
         def store_stage(chunks, rid):
+            vectors = self._latest_vectors
+            if len(vectors) != len(chunks):
+                raise ValueError("embed stage did not return one vector per chunk")
             documents = []
-            for chunk in chunks:
+            for chunk, vector in zip(chunks, vectors, strict=True):
                 document = Document(
                     id=chunk["chunk_id"],
                     content=chunk["text"],
+                    embedding=list(vector),
                     meta={
                         "source_id": chunk["source_id"],
                         "document_id": chunk["document_id"],
@@ -98,6 +107,10 @@ class HaystackAdapter(BaseAdapter):
                 split_overlap=int(self.config["chunking"]["chunk_overlap_tokens"]),  # type: ignore[index]
             )
             expected_ids = {document.id for document in documents}
+            vector_by_chunk = {
+                chunk["chunk_id"]: list(vector)
+                for chunk, vector in zip(chunks, vectors, strict=True)
+            }
             by_content = {d.content or "": d for d in documents}
             split_documents = splitter.run(documents=documents)["documents"]
             restored = []
@@ -107,6 +120,10 @@ class HaystackAdapter(BaseAdapter):
                     child = dataclasses.replace(
                         child, id=original.id, meta=dict(original.meta)
                     )
+                # The splitter does not propagate embeddings to children; the
+                # contract-stable embedding is re-asserted before the write.
+                if not child.embedding:
+                    child.embedding = vector_by_chunk[child.id]
                 restored.append(child)
             if {doc.id for doc in restored} != expected_ids:
                 raise ValueError("splitter changed normalized chunk identities")
@@ -114,7 +131,11 @@ class HaystackAdapter(BaseAdapter):
             store = InMemoryDocumentStore()
             writer = DocumentWriter(store, policy=DuplicatePolicy.FAIL)  # HS-2
             writer.run(documents=restored)
-            self._stores[rid] = {"store": store}
+            self._stores[rid] = {
+                "store": store,
+                "vectors": [list(vector) for vector in vectors],
+                "chunk_ids": [chunk["chunk_id"] for chunk in chunks],
+            }
 
         return self._build_release_common(
             corpus_path, manifest, trace, embed_stage, store_stage, release_id

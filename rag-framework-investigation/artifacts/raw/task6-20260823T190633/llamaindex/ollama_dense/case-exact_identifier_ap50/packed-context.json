@@ -1,0 +1,121 @@
+{
+  "packed": [
+    {
+      "source_id": "approval-matrix",
+      "document_id": "b3ad1862e34aba62ac605dd86f1cf5496dd84b9d20ab2abbf7c0470114dae61e",
+      "chunk_id": "117c37f8b576e971468cbe8c6e8c77a476d76fb6610fd7ffa33476efc7f4fecc",
+      "text": "Rule ID AP-50. Any single reimbursement claim above $50 requires manager approval before submission. Claims of $50 or less follow the standard receipt review.",
+      "span": [
+        132,
+        290
+      ],
+      "score": 0.666590226830071,
+      "rank": 1,
+      "metadata": {
+        "source_id": "approval-matrix",
+        "document_id": "b3ad1862e34aba62ac605dd86f1cf5496dd84b9d20ab2abbf7c0470114dae61e",
+        "release_id": "v1",
+        "span": [
+          132,
+          290
+        ]
+      },
+      "release_id": "v1",
+      "method": "dense"
+    },
+    {
+      "source_id": "device-security",
+      "document_id": "1598211be5a23c3b648be40334163d21776729a8b9ee9b750caed96b248976d9",
+      "chunk_id": "98e6f611f08475cd3275aa624f63accde585ce964e57fc37f3ee953b20c88f40",
+      "text": "When using public Wi-Fi, employees must use the company VPN and lock unattended devices. This security rule does not authorize or set reimbursement amounts.",
+      "span": [
+        143,
+        299
+      ],
+      "score": 0.6001269846768693,
+      "rank": 2,
+      "metadata": {
+        "source_id": "device-security",
+        "document_id": "1598211be5a23c3b648be40334163d21776729a8b9ee9b750caed96b248976d9",
+        "release_id": "v1",
+        "span": [
+          143,
+          299
+        ]
+      },
+      "release_id": "v1",
+      "method": "dense"
+    },
+    {
+      "source_id": "finance-memo-obsolete",
+      "document_id": "c65ee380126768313c327a329444187ae74b24a4e870276a2f87388c8de5a974",
+      "chunk_id": "0338d25f38f54bdaa5e5a534dc8d8df4e641697bf19796076a08e73bc833038b",
+      "text": "This retired memo allowed $15 per travel day for hotel internet. It was replaced by the current Business Travel Wi-Fi Reimbursement policy and must not be used for new claims.",
+      "span": [
+        150,
+        325
+      ],
+      "score": 0.5509389488961849,
+      "rank": 3,
+      "metadata": {
+        "source_id": "finance-memo-obsolete",
+        "document_id": "c65ee380126768313c327a329444187ae74b24a4e870276a2f87388c8de5a974",
+        "release_id": "v1",
+        "span": [
+          150,
+          325
+        ]
+      },
+      "release_id": "v1",
+      "method": "dense"
+    },
+    {
+      "source_id": "travel-wifi-current",
+      "document_id": "df1561d92d153dfa816903979ceb947eec990fb33a7da75763a4c29095387650",
+      "chunk_id": "cc7a0b48135312c48e4e2fed8021f952969895659c800dc8f9aa728c5d3c0886",
+      "text": "Employees travelling for approved business may claim hotel Wi-Fi needed to perform work. Reimbursement is limited to $25 per travel day. Attach the hotel folio and state the business trip dates.",
+      "span": [
+        148,
+        342
+      ],
+      "score": 0.5264248641286304,
+      "rank": 4,
+      "metadata": {
+        "source_id": "travel-wifi-current",
+        "document_id": "df1561d92d153dfa816903979ceb947eec990fb33a7da75763a4c29095387650",
+        "release_id": "v1",
+        "span": [
+          148,
+          342
+        ]
+      },
+      "release_id": "v1",
+      "method": "dense"
+    },
+    {
+      "source_id": "office-snacks",
+      "document_id": "ae6541d20498cadedc6f6146193d7ac59fa60d9953d2a417bea67cfada88a4ce",
+      "chunk_id": "2f2d0644d976adc9543b51b245d4f72cf41900bc558429675a8c93e347e6a7de",
+      "text": "Office snack orders are limited to $75 per team each month and require the office coordinator's receipt. This policy does not govern travel or internet expenses.",
+      "span": [
+        129,
+        290
+      ],
+      "score": 0.5236748859347613,
+      "rank": 5,
+      "metadata": {
+        "source_id": "office-snacks",
+        "document_id": "ae6541d20498cadedc6f6146193d7ac59fa60d9953d2a417bea67cfada88a4ce",
+        "release_id": "v1",
+        "span": [
+          129,
+          290
+        ]
+      },
+      "release_id": "v1",
+      "method": "dense"
+    }
+  ],
+  "rejected": [],
+  "used_tokens": 135
+}

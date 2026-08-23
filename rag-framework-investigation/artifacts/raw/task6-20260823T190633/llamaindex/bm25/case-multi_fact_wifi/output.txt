@@ -1,0 +1,5 @@
+Contractors do not use the employee reimbursement program. A contractor may bill a business expense only when the signed statement of work explicitly marks that expense as reimbursable; otherwise the contractor bears the cost. 
+
+There is no information in the context indicating that contractors can expense hotel Wi-Fi or when approval is required for such expenses. Therefore, based on the provided context, there is insufficient evidence to determine whether contractors can expense hotel Wi-Fi or when approval is required. 
+
+Policy source_id: [1] (contractor-scope)

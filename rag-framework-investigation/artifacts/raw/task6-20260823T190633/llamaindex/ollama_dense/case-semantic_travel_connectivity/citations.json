@@ -1,0 +1,57 @@
+[
+  {
+    "position": 1,
+    "source_id": "travel-wifi-current",
+    "document_id": "df1561d92d153dfa816903979ceb947eec990fb33a7da75763a4c29095387650",
+    "chunk_id": "cc7a0b48135312c48e4e2fed8021f952969895659c800dc8f9aa728c5d3c0886",
+    "span": [
+      148,
+      342
+    ],
+    "release_id": "v1"
+  },
+  {
+    "position": 2,
+    "source_id": "finance-memo-obsolete",
+    "document_id": "c65ee380126768313c327a329444187ae74b24a4e870276a2f87388c8de5a974",
+    "chunk_id": "0338d25f38f54bdaa5e5a534dc8d8df4e641697bf19796076a08e73bc833038b",
+    "span": [
+      150,
+      325
+    ],
+    "release_id": "v1"
+  },
+  {
+    "position": 3,
+    "source_id": "device-security",
+    "document_id": "1598211be5a23c3b648be40334163d21776729a8b9ee9b750caed96b248976d9",
+    "chunk_id": "98e6f611f08475cd3275aa624f63accde585ce964e57fc37f3ee953b20c88f40",
+    "span": [
+      143,
+      299
+    ],
+    "release_id": "v1"
+  },
+  {
+    "position": 4,
+    "source_id": "office-snacks",
+    "document_id": "ae6541d20498cadedc6f6146193d7ac59fa60d9953d2a417bea67cfada88a4ce",
+    "chunk_id": "2f2d0644d976adc9543b51b245d4f72cf41900bc558429675a8c93e347e6a7de",
+    "span": [
+      129,
+      290
+    ],
+    "release_id": "v1"
+  },
+  {
+    "position": 5,
+    "source_id": "contractor-scope",
+    "document_id": "b096d956b33fec8dad322a18b42a77995483f1709b6d997e05c590122c97e16f",
+    "chunk_id": "e04e2793bd19f39d12945f2adf1905a7d9a8120403dda4088d1e8301a9c39f47",
+    "span": [
+      134,
+      360
+    ],
+    "release_id": "v1"
+  }
+]

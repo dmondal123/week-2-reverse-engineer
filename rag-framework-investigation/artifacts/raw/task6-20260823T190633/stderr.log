@@ -1,0 +1,2 @@
+/Users/dmondal/Documents/week2-fde-assignment/week2/rag-framework-investigation/src/rag_compare/adapters/haystack_adapter.py:126: Warning: Mutating attribute 'embedding' on an instance of 'Document' can lead to unexpected behavior by affecting other parts of the pipeline that use the same dataclass instance. Use `dataclasses.replace(instance, embedding=new_value)` instead. See https://docs.haystack.deepset.ai/docs/custom-components#requirements for details.
+  child.embedding = vector_by_chunk[child.id]

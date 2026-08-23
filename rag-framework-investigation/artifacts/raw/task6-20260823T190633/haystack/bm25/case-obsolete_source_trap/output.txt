@@ -1,0 +1,1 @@
+The current daily hotel internet reimbursement limit is $25 per travel day, as stated in policy source_id=travel-wifi-current. This limit applies to employees traveling for approved business and requires attachment of the hotel folio and statement of business trip dates. The retired memo (source_id=finance-memo-obsolete) is not to be used for new claims and thus does not apply.

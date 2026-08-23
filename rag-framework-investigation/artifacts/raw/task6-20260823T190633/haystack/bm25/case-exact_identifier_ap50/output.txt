@@ -1,0 +1,1 @@
+Rule ID AP-50 requires that any single reimbursement claim above $50 requires manager approval before submission. Claims of $50 or less follow the standard receipt review. (Source: source_id=approval-matrix)

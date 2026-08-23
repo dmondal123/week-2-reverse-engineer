@@ -1,0 +1,1 @@
+The daily limit for hotel Wi-Fi on approved business travel under corpus version 2 is $30 per travel day. This is established in source_id=travel-wifi-current (chunk_id=83451783800288f0971810d8a882e56dc40c722f103df2533e9a1321650a9366).

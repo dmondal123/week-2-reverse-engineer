@@ -447,23 +447,23 @@ Create: `artifacts/results/controlled-results.csv`
 
 Create: `artifacts/results/controlled-summary.json`
 
-- [ ] **Step 1: Implement deterministic metrics**
+- [x] **Step 1: Implement deterministic metrics**
 
 Compute recall@k, MRR, forbidden-source violation, citation source correctness, citation span correctness, per-stage latency, total latency, and release consistency. Persist per-case values; do not collapse them into one score.
 
-- [ ] **Step 2: Freeze the run manifest before execution**
+- [x] **Step 2: Freeze the run manifest before execution**
 
 Hash repository/environment manifests, experiment configuration, corpus manifest, evaluation cases, and prompt. Give the run a unique `run_id`; copy the resolved manifest into `artifacts/raw/<run_id>/`.
 
-- [ ] **Step 3: Execute the 2x2 experiment**
+- [x] **Step 3: Execute the 2x2 experiment**
 
 Run both frameworks with BM25 and dense retrieval while holding every other variable fixed. Save raw stdout/stderr, JSONL traces, retrieved candidates, packed context, model output, citations, and metrics for every case.
 
-- [ ] **Step 4: Verify the experiment control**
+- [x] **Step 4: Verify the experiment control**
 
 Compare run manifests programmatically. The only allowed material differences within a framework pair are `retriever_kind` and retriever-specific index data. Fail the run summary if corpus, parser/chunker config, reranker, generator, prompt, cases, or active release differs.
 
-- [ ] **Step 5: Commit code and sanitized result summaries**
+- [x] **Step 5: Commit code and sanitized result summaries**
 
 Raw artifacts may be included if small and sanitized; never commit model caches, virtual environments, or vendor repositories.
 

@@ -1,0 +1,20 @@
+{
+  "conditions": [
+    "llamaindex:bm25",
+    "llamaindex:ollama_dense",
+    "haystack:bm25",
+    "haystack:ollama_dense"
+  ],
+  "created_at": "2026-08-23T19:06:33+00:00",
+  "experiment_configuration_sha256": "816a458469de17611ae8b18c57d7e0d9e4079ddbac5084d47a99248be332d643",
+  "input_hashes": {
+    "config/environment-manifest.json": "c96063a753b60b443c04a29c0f5e5a28d30e7df8af4ecd86970b0dadf9c62931",
+    "config/experiment.json": "a95c5d061e7ce78b53f185792146076d8f35af185d0b1162331998bc52726409",
+    "config/repository-manifest.json": "5c33a5e6722740f4acf44db6fc0777dc34142a01050ac83ee83e0eb8f08fdd03",
+    "corpus/v1/manifest.json": "1488c8aa64e348eef7c23530f1dd39df13db003ddcb74df08b296371287c068c",
+    "corpus/v2/manifest.json": "1ff5b77da6a4696d36c001d849f23833e8b64c1b08a2d1aa9febbee259b7b85b",
+    "eval/cases.json": "d4508a7edf96bcc20b04bbfb30a73b22f5cf1b17e980a8c409ab32570d23312b",
+    "generation.prompt_template": "cba6cea2ef5d905fbf513e35d90181f45f2235931b602ebe5b95e82469fb51d7"
+  },
+  "run_id": "task6-20260823T190633"
+}
