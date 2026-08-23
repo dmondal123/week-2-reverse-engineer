@@ -8,7 +8,7 @@
   ],
   "conditions": [
     {
-      "artifact_dir": "artifacts/raw/task6-20260823T202231/haystack/bm25",
+      "artifact_dir": "artifacts/raw/task6-20260823T203946/haystack/bm25",
       "build_manifest_sha256": "1333d018bc0dfd40ae968d17f81dc271864206f3fb6ad9f3bfc27597d417366c",
       "case_count": 5,
       "condition_id": "haystack:bm25",
@@ -17,21 +17,21 @@
         "citation_source_correctness": 1.0,
         "citation_span_correctness": 1.0,
         "forbidden_source_violation": 0.0,
-        "latency_capture_release_ms": 0.000242,
-        "latency_generate_ms": 1179.964083,
-        "latency_pack_ms": 0.013158,
-        "latency_release_filter_ms": 0.006558,
-        "latency_rerank_ms": 0.004583,
-        "latency_retrieve_ms": 9.610125,
+        "latency_capture_release_ms": 0.00035,
+        "latency_generate_ms": 1164.048142,
+        "latency_pack_ms": 0.010084,
+        "latency_release_filter_ms": 0.005266,
+        "latency_rerank_ms": 0.003275,
+        "latency_retrieve_ms": 9.143942,
         "mrr": 0.866667,
         "recall_at_k": 1.0,
         "release_consistency": 1.0,
         "required_phrase_coverage": 0.733333,
-        "total_latency_ms": 1189.59875
+        "total_latency_ms": 1173.211058
       }
     },
     {
-      "artifact_dir": "artifacts/raw/task6-20260823T202231/haystack/ollama_dense",
+      "artifact_dir": "artifacts/raw/task6-20260823T203946/haystack/ollama_dense",
       "build_manifest_sha256": "1333d018bc0dfd40ae968d17f81dc271864206f3fb6ad9f3bfc27597d417366c",
       "case_count": 5,
       "condition_id": "haystack:ollama_dense",
@@ -40,21 +40,21 @@
         "citation_source_correctness": 1.0,
         "citation_span_correctness": 1.0,
         "forbidden_source_violation": 0.0,
-        "latency_capture_release_ms": 0.000267,
-        "latency_generate_ms": 1335.207183,
-        "latency_pack_ms": 0.012792,
-        "latency_release_filter_ms": 0.007092,
-        "latency_rerank_ms": 0.005142,
-        "latency_retrieve_ms": 25.926883,
+        "latency_capture_release_ms": 0.0004,
+        "latency_generate_ms": 1298.705017,
+        "latency_pack_ms": 0.014484,
+        "latency_release_filter_ms": 0.007417,
+        "latency_rerank_ms": 0.004617,
+        "latency_retrieve_ms": 25.131834,
         "mrr": 0.9,
         "recall_at_k": 1.0,
         "release_consistency": 1.0,
         "required_phrase_coverage": 0.8,
-        "total_latency_ms": 1361.159359
+        "total_latency_ms": 1323.863767
       }
     },
     {
-      "artifact_dir": "artifacts/raw/task6-20260823T202231/llamaindex/bm25",
+      "artifact_dir": "artifacts/raw/task6-20260823T203946/llamaindex/bm25",
       "build_manifest_sha256": "e9769660c30770837c25104e681fea98744e2e8c08dcd1b0e6da514c213a4dd7",
       "case_count": 5,
       "condition_id": "llamaindex:bm25",
@@ -64,20 +64,20 @@
         "citation_span_correctness": 1.0,
         "forbidden_source_violation": 0.0,
         "latency_capture_release_ms": 0.000233,
-        "latency_generate_ms": 1202.771558,
-        "latency_pack_ms": 0.013333,
-        "latency_release_filter_ms": 0.007875,
-        "latency_rerank_ms": 0.004142,
-        "latency_retrieve_ms": 3.682683,
+        "latency_generate_ms": 1242.3236,
+        "latency_pack_ms": 0.016142,
+        "latency_release_filter_ms": 0.008725,
+        "latency_rerank_ms": 0.004833,
+        "latency_retrieve_ms": 4.052742,
         "mrr": 0.9,
         "recall_at_k": 1.0,
         "release_consistency": 1.0,
         "required_phrase_coverage": 0.8,
-        "total_latency_ms": 1206.479824
+        "total_latency_ms": 1246.406275
       }
     },
     {
-      "artifact_dir": "artifacts/raw/task6-20260823T202231/llamaindex/ollama_dense",
+      "artifact_dir": "artifacts/raw/task6-20260823T203946/llamaindex/ollama_dense",
       "build_manifest_sha256": "e9769660c30770837c25104e681fea98744e2e8c08dcd1b0e6da514c213a4dd7",
       "case_count": 5,
       "condition_id": "llamaindex:ollama_dense",
@@ -86,17 +86,17 @@
         "citation_source_correctness": 1.0,
         "citation_span_correctness": 1.0,
         "forbidden_source_violation": 0.0,
-        "latency_capture_release_ms": 0.000242,
-        "latency_generate_ms": 1295.795592,
-        "latency_pack_ms": 0.00985,
-        "latency_release_filter_ms": 0.0049,
-        "latency_rerank_ms": 0.002775,
-        "latency_retrieve_ms": 20.345208,
+        "latency_capture_release_ms": 0.000284,
+        "latency_generate_ms": 1469.757933,
+        "latency_pack_ms": 0.009783,
+        "latency_release_filter_ms": 0.007842,
+        "latency_rerank_ms": 0.003408,
+        "latency_retrieve_ms": 20.815633,
         "mrr": 0.9,
         "recall_at_k": 1.0,
         "release_consistency": 1.0,
         "required_phrase_coverage": 0.8,
-        "total_latency_ms": 1316.158566
+        "total_latency_ms": 1490.594883
       }
     }
   ],
@@ -110,7 +110,7 @@
     "failures": [],
     "passed": true
   },
-  "created_at": "2026-08-23T20:22:57+00:00",
+  "created_at": "2026-08-23T20:40:13+00:00",
   "input_hashes": {
     "config/environment-manifest.json": "c96063a753b60b443c04a29c0f5e5a28d30e7df8af4ecd86970b0dadf9c62931",
     "config/experiment.json": "6adaa5061ab169eb6742801a6007c8adae7713eb524db824117bac294ba6d4d2",
@@ -125,11 +125,11 @@
     "failures": [],
     "passed": true
   },
-  "raw_artifacts_root": "artifacts/raw/task6-20260823T202231",
+  "raw_artifacts_root": "artifacts/raw/task6-20260823T203946",
   "results_csv": "artifacts/results/controlled-results.csv",
   "results_json": "artifacts/results/controlled-summary.json",
-  "run_id": "task6-20260823T202231",
-  "run_manifest": "artifacts/raw/task6-20260823T202231/run-manifest.json",
+  "run_id": "task6-20260823T203946",
+  "run_manifest": "artifacts/raw/task6-20260823T203946/run-manifest.json",
   "status": "passed",
-  "wall_clock_seconds": 25.874
+  "wall_clock_seconds": 26.652
 }

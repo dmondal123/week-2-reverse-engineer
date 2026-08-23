@@ -555,11 +555,11 @@ Create: `scripts/package_submission.py`
 
 Create: `submission/rag-framework-investigation.zip`
 
-- [ ] **Step 1: Write exact reproduction commands**
+- [x] **Step 1: Write exact reproduction commands**
 
 README must cover environment creation, Ollama model installation, dependency installation, repository SHA checkout, unit tests, pipeline build, controlled experiment, failure injection, paper artifact generation, and packaging.
 
-- [ ] **Step 2: Run the complete verification suite from a clean shell**
+- [x] **Step 2: Run the complete verification suite from a clean shell** *(137 tests passed; run_experiment status=passed, controls+gates)*
 
 ```bash
 .venv/bin/python -m pytest -q
@@ -568,15 +568,15 @@ README must cover environment creation, Ollama model installation, dependency in
 
 Expected: all tests pass, all four conditions finish, no release-consistency failure, and raw/summary artifacts are produced.
 
-- [ ] **Step 3: Implement safe packaging**
+- [x] **Step 3: Implement safe packaging** *(zipfile allowlist + denylist + size limit; 444 members)*
 
 Use Python zipfile with an explicit allowlist. Reject any path containing `.env`, `.venv`, `node_modules`, caches, credentials, vendor clones, generated build folders, or files above the chosen artifact-size limit. Include the README, manifests, source, tests, corpus, cases, evidence, sanitized artifacts, paper, tables/diagram source, ADR, and disclosure.
 
-- [ ] **Step 4: Verify the ZIP mechanically**
+- [x] **Step 4: Verify the ZIP mechanically** *(testzip/required-list/exclusion scan/extract+parse; sha256 in submission/verification.json)*
 
 Open it with `ZipFile.testzip()`, assert the required file list, scan member names for exclusions, extract to a temporary directory, and parse every JSON/CSV file. Save the ZIP SHA-256 and verification output beside the archive.
 
-- [ ] **Step 5: Perform final scope and integrity review**
+- [x] **Step 5: Perform final scope and integrity review** *(no secrets, no missing evidence IDs, paper claims artifact-backed)*
 
 Confirm no fabricated citations/results, no README-only architectural claims, no missing evidence IDs, no secrets, no uncommitted required files, and no unrelated course materials in the archive.
 

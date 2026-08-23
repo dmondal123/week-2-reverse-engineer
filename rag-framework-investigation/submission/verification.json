@@ -1,0 +1,13 @@
+{
+  "checks": {
+    "exclusion_scan": "passed",
+    "extraction_and_parse": "passed",
+    "required_members": "passed",
+    "testzip": "passed"
+  },
+  "failures": [],
+  "member_count": 444,
+  "status": "passed",
+  "zip_path": "submission/rag-framework-investigation.zip",
+  "zip_sha256": "20f8c238b94172b6dfeaf59b4832160fb7eede56cd2fa09c655e9d3f0874898e"
+}
