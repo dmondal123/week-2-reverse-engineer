@@ -1,0 +1,58 @@
+%% Architecture sequence: real index-time and query-time ownership plus the release boundary.
+%% Sources: EV-T4-001..EV-T4-012 (pinned SHAs llama_index@d8021225, haystack@c7cb46c0);
+%% release boundary per src/rag_compare/release.py and failure injection (artifacts/results/failure-injection.json).
+sequenceDiagram
+    autonumber
+    participant C as Corpus (v1/v2 .md)
+    participant R as Release layer (framework-independent)
+    participant LI as LlamaIndex adapter
+    participant HI as Haystack adapter
+    participant OL as Ollama (nomic-embed-text / qwen3:4b-instruct)
+    participant Q as Query caller
+
+    rect rgb(235, 245, 255)
+    Note over C,R: Index-time — release boundary first (immutable namespace + validated manifest)
+    C->>R: corpus files + manifest.json (source_id, hashes)
+    R->>R: validate_release: file set, SHA-256 hashes, counts, schema, embedding identity (EV-T4-001 context; release contract tests)
+    R-->>R: staging namespace immutable until promoted
+
+    alt LlamaIndex index path
+        R->>LI: build_release(corpus_path, manifest, trace)
+        LI->>LI: parse/split nodes; node ids freshly generated (EV-T4-001, LI-9)
+        LI->>OL: embed_nodes with EXPLICIT embed model (no Settings fallback) (EV-T4-002/004/005)
+        OL-->>LI: vectors (768-dim)
+        LI->>R: write nodes into staging store; resolved settings snapshotted into stage events
+    else Haystack index path
+        R->>HI: build_release(corpus_path, manifest, trace)
+        HI->>HI: DocumentSplitter -> children are NEW Documents, ids re-hashed from content (EV-T4-007, HS-3/HS-4)
+        HI->>OL: embeddings re-asserted before write (splitter drops vectors; Task 6 fix)
+        OL-->>HI: vectors (768-dim)
+        HI->>R: DocumentWriter.run -> in-memory store; DuplicatePolicy.FAIL on dup ids (EV-T4-006, HS-1/HS-2)
+    end
+
+    R->>R: promote_release: validate staging == manifest, then ONE atomic os.replace of active pointer
+    Note over R: Failed validation never touches active.json (Task 7: partial v2 rejected, pointer stayed {"release_id": "v1"})
+    end
+
+    rect rgb(240, 255, 240)
+    Note over Q,OL: Query-time — release captured ONCE at query start
+    Q->>R: capture_active_release() -> release_id pinned for this query
+    Q->>LI: query(text, retriever_kind, active_release, trace)
+    Q->>HI: query(text, retriever_kind, active_release, trace)
+
+    par LlamaIndex retrieve (EV-T4-008/LI-8)
+        LI->>OL: embed query (explicit model) or BM25 via store
+        OL-->>LI: query vector
+        LI->>LI: VectorStoreRetriever._retrieve top_k=5, ordered by store score
+    and Haystack retrieve (HS-6..HS-10)
+        HI->>HI: Pipeline.run explicit graph; BM25 in store (scale_score=False) or dense w/ filters
+        HI->>OL: embed query for ollama_dense branch
+        OL-->>HI: query vector
+    end
+
+    LI->>LI: filter_chunks_for_release(release_id) - raises MixedReleaseError on foreign chunk
+    HI->>HI: filter_chunks_for_release(release_id) - same shared control
+    LI->>OL: generate (temperature 0, fixed prompt hash cba6cea2...)
+    HI->>OL: generate (same prompt, same budget 1200 tokens)
+    OL-->>Q: answer + citations (source_id_and_chunk_id mode); every chunk carries provenance + release_id
+    end

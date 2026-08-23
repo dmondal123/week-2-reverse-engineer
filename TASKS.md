@@ -519,27 +519,27 @@ Create: `paper/risk-control.md`
 
 Update: `week2/AI_COLLABORATION.md`
 
-- [ ] **Step 1: Write the executive claim last, but place it first**
+- [x] **Step 1: Write the executive claim last, but place it first** *(draft: ~195-word claim in place; final wording awaits Human approval)*
 
 Keep it 150-250 words and state the production decision, most important finding, confidence, and consequence. Do not open with framework history.
 
-- [ ] **Step 2: Complete every required paper section**
+- [x] **Step 2: Complete every required paper section** *(draft: all ten required sections present, claims evidence-cited)*
 
 Use the exact required order from the problem statement. Every architectural or experimental claim must cite an evidence ID or artifact. Explicitly distinguish facts, interpretations, hypotheses, counterevidence, and unknowns.
 
-- [ ] **Step 3: Produce the four required visuals/tables**
+- [x] **Step 3: Produce the four required visuals/tables** *(draft: architecture.mmd + three table files generated from ledger/result artifacts)*
 
 The architecture sequence must show index-time and query-time ownership plus the release boundary. The other three artifacts must be generated from the ledger or result files, not reconstructed from memory.
 
-- [ ] **Step 4: Write the ADR**
+- [x] **Step 4: Write the ADR** *(draft: decision "combine" with alternatives/consequences/reversibility/next evidence; release recommendation separated)*
 
 Choose `adopt`, `adapt`, `combine`, `avoid`, or `investigate`; state alternatives, consequences, reversibility, and next evidence worth buying. Separate framework findings from the framework-independent release recommendation.
 
-- [ ] **Step 5: Complete the AI-use disclosure**
+- [x] **Step 5: Complete the AI-use disclosure** *(draft: paper §10 + AI_COLLABORATION.md Task 8 entry; counters pending Human recording)*
 
 Record material prompts/instructions, tools/models, suggestions accepted or rejected, verification method, and residual uncertainty. Do not claim AI output as source or runtime evidence.
 
-- [ ] **Step 6: Validate word count and evidence minimums**
+- [x] **Step 6: Validate word count and evidence minimums** *(draft: body ≈3,071 words excl. appendix; 22 commit-bound refs, 2 runtime artifacts, failure result, 2 history refs, counterevidence, rejected explanation — draft-level check, subject to review)*
 
 The paper body must be 3,000-4,500 words excluding appendices. Check for at least 12 commit-bound references, two runtime artifacts, one failure result, two history/issue/ADR references, one counterexample, and one rejected explanation.
 
