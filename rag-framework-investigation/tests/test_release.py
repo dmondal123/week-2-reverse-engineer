@@ -44,7 +44,7 @@ def complete_release(tmp_path, release_id):
             "config_sha256": "b" * 64,
         },
         "embedding": {
-            "name": "nomic-embed-text-hf:latest",
+            "name": "nomic-embed-text",
             "ollama_digest": "c" * 64,
             "dimensions": 768,
             "distance_metric": "cosine",

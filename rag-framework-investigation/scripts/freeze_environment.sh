@@ -27,7 +27,7 @@ echo "[ollama]"
 ollama --version 2>&1 || true
 ollama list 2>&1 || true
 
-for model in nomic-embed-text-hf:latest qwen3-4b-instruct-2507-hf:latest; do
+for model in nomic-embed-text:latest qwen3:4b-instruct-2507-q4_K_M; do
     echo "[ollama_show:$model]"
     ollama show "$model" 2>&1 || true
 done
