@@ -479,23 +479,23 @@ Create: `artifacts/results/failure-injection.json`
 
 Create: `artifacts/raw/failure-injection-trace.jsonl`
 
-- [ ] **Step 1: Write the failing end-to-end test**
+- [x] **Step 1: Write the failing end-to-end test**
 
 The test activates v1, indexes only the first half of v2 into a staging namespace, attempts promotion, queries all evaluation cases, and asserts promotion fails, the pointer remains v1, and every returned chunk is v1.
 
-- [ ] **Step 2: Run the test before any corrective change**
+- [x] **Step 2: Run the test before any corrective change**
 
 If mixed-version data appears, preserve that first failure as the runtime failure-injection artifact. Do not overwrite it with the later passing trace.
 
-- [ ] **Step 3: Apply the release controls from Task 3**
+- [x] **Step 3: Apply the release controls from Task 3**
 
 Require expected file hashes/counts/schema/embedding identity and filter every retrieval branch by the release captured at query start.
 
-- [ ] **Step 4: Prove rejection, recovery, and promotion**
+- [x] **Step 4: Prove rejection, recovery, and promotion**
 
 Run partial v2 and observe rejection; complete v2; validate; promote atomically; query again; assert every result is v2 and deleted v1 content cannot be returned.
 
-- [ ] **Step 5: Save evidence and commit**
+- [x] **Step 5: Save evidence and commit** *(evidence saved; commit made with explicit Human approval)*
 
 The result JSON must include expected behavior, observed behavior, commands, pointer values before/after, manifest hashes, assertion results, and artifact paths.
 

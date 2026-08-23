@@ -143,6 +143,10 @@ class HaystackAdapter(BaseAdapter):
 
     # ---- query -----------------------------------------------------------------
 
+    def drop_release(self, release_id: str) -> None:
+        """Delete a release namespace, as a completed release retirement would."""
+        self._stores.pop(release_id, None)
+
     def _release_filter(self, active_release: str) -> dict:
         return {
             "field": "release_id",

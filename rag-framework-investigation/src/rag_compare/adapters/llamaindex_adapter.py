@@ -130,6 +130,10 @@ class LlamaIndexAdapter(BaseAdapter):
             ]
         )
 
+    def drop_release(self, release_id: str) -> None:
+        """Delete a release namespace, as a completed release retirement would."""
+        self._indexes.pop(release_id, None)
+
     def retrieve_candidates(
         self, query_text: str, retriever_kind: str, active_release: str, trace
     ) -> list[dict]:
