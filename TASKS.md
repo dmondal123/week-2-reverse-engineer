@@ -401,31 +401,31 @@ Test: `tests/test_rerank.py`
 
 Test: `tests/test_adapters.py`
 
-- [ ] **Step 1: Define the shared adapter contract**
+- [x] **Step 1: Define the shared adapter contract**
 
 Both adapters must implement `build_release(corpus_path, manifest, trace)` and `query(query_text, retriever_kind, active_release, trace)`. Returned candidates must normalize to source/document/chunk IDs, text, span, score, rank, metadata, and release ID.
 
-- [ ] **Step 2: Test deterministic reranking before implementation**
+- [x] **Step 2: Test deterministic reranking before implementation**
 
 Test lowercase tokenization, query-term coverage score, stable tie-break by incoming rank then chunk ID, and preservation of original retrieval score/rank.
 
-- [ ] **Step 3: Implement the fixed reranker and context packer**
+- [x] **Step 3: Implement the fixed reranker and context packer**
 
 The reranker may only reorder retrieved candidates. The packer admits complete chunks until the configured character/token approximation budget is reached and records rejection reasons; it must not truncate chunks.
 
-- [ ] **Step 4: Implement the LlamaIndex adapter using verified source APIs**
+- [x] **Step 4: Implement the LlamaIndex adapter using verified source APIs**
 
 Use the exact public classes traced in Task 4. Set every retrieval-affecting value explicitly rather than relying on `Settings`; snapshot resolved settings into each stage event. Support BM25 and dense retrieval over the same normalized chunks and enforce `release_id` filtering.
 
-- [ ] **Step 5: Implement the Haystack adapter using verified source APIs**
+- [x] **Step 5: Implement the Haystack adapter using verified source APIs**
 
 Use the exact components traced in Task 4. Configure converter/splitter, in-memory stores, BM25, dense retrieval, filters, and Ollama components explicitly. Emit one stage event at each component boundary and enforce the same release filter.
 
-- [ ] **Step 6: Test contract equivalence**
+- [x] **Step 6: Test contract equivalence**
 
 For both adapters assert stage order is identical, all trace fields exist, all chunks carry active release and provenance fields, citations resolve to corpus spans, and changing the active release between query start and retrieval cannot mix releases.
 
-- [ ] **Step 7: Run adapter tests and commit**
+- [x] **Step 7: Run adapter tests and commit**
 
 ```bash
 .venv/bin/python -m pytest tests/test_rerank.py tests/test_adapters.py -q
