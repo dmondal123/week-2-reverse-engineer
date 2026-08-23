@@ -1,0 +1,5 @@
+# Runtime dependencies (none required by src/rag_compare itself)
+
+# Development / tooling
+pytest>=8.0
+ruff>=0.6

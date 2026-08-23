@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "release_id": "synthetic-policy-v1",
+  "active_corpus_version": "v1",
+  "chunking": {
+    "splitter": "token_window",
+    "tokenizer": "cl100k_base",
+    "chunk_size_tokens": 200,
+    "chunk_overlap_tokens": 40
+  },
+  "boundary_policy": "fixed_token_window",
+  "include_front_matter": true,
+  "retrieval": {
+    "retriever_conditions": ["bm25", "ollama_dense"],
+    "top_k": 5,
+    "score_order": "descending",
+    "tie_break_rule": "score_desc_then_chunk_id_asc",
+    "metadata_filter": {"status": "current_or_obsolete_as_indexed"}
+  },
+  "reranking": {
+    "enabled": false,
+    "rerank_k": 3,
+    "method": "none"
+  },
+  "context": {
+    "budget_tokens": 1200,
+    "packing_order": "retrieval_rank_then_chunk_id_asc",
+    "citation_mode": "source_id_and_chunk_id"
+  },
+  "models": {
+    "embedding_model": "nomic-embed-text-hf:latest",
+    "embedding_ollama_id": "e6895cfb76ea",
+    "generation_model": "qwen3-4b-instruct-2507-hf:latest",
+    "generation_ollama_id": "83f94de04436"
+  },
+  "generation": {
+    "temperature": 0,
+    "top_p": 1,
+    "max_output_tokens": 256,
+    "seed": 0,
+    "prompt_template": "Answer only from the supplied context. Cite each policy source_id. If the context does not establish the answer, say insufficient evidence."
+  },
+  "prompt_sha256": "2f11f9b2571d6d3a05b58c018e96e7d388783b2699374914c9acdfc698c2d16e",
+  "identity": {
+    "document_id_rule": "sha256('document' + U+001F + source_id + U+001F + content_sha256)",
+    "chunk_id_rule": "sha256('chunk' + U+001F + document_id + U+001F + start + U+001F + end + U+001F + chunk_text)",
+    "text_encoding": "utf-8"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "accessed_at": "2026-08-23T22:30:00+05:30",
+  "repositories": [
+    {
+      "name": "haystack",
+      "remote_url": "https://github.com/deepset-ai/haystack.git",
+      "default_branch": "main",
+      "commit_sha": "c7cb46c0f28ad1984f60e5d3e9404b124a221437",
+      "license_path": "LICENSE",
+      "current_local_path": "../../haystack",
+      "portable_path": "../../haystack",
+      "verification_status": "verified via git rev-parse / git remote on local clone"
+    },
+    {
+      "name": "llama_index",
+      "remote_url": "https://github.com/run-llama/llama_index.git",
+      "default_branch": "main",
+      "commit_sha": "d8021225eb7e7b276d5ceb476b0a4650240f27f8",
+      "license_path": "LICENSE",
+      "current_local_path": "../../llama_index",
+      "portable_path": "../../llama_index",
+      "verification_status": "verified via git rev-parse / git remote on local clone"
+    }
+  ]
+}

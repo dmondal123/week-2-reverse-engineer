@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "freeze_scope": "task-1",
+  "accessed_at": "2026-08-20T16:00:00+05:30",
+  "runtime": {
+    "python_required": "3.12.x",
+    "embedding_calls": "Ollama only",
+    "generation_calls": "Ollama only",
+    "hosted_or_paid_apis": false
+  },
+  "approved_models": [
+    {
+      "ollama_name": "nomic-embed-text-hf:latest",
+      "source": "custom Hugging Face import",
+      "ollama_id": "e6895cfb76ea",
+      "architecture": "nomic-bert",
+      "embedding_length": 768,
+      "quantization": "Q4_K_M",
+      "smoke_test": {
+        "status": "passed",
+        "input": "release manifest",
+        "non_empty": true,
+        "numeric": true
+      }
+    },
+    {
+      "ollama_name": "qwen3-4b-instruct-2507-hf:latest",
+      "source": "custom Hugging Face import",
+      "ollama_id": "83f94de64436",
+      "architecture": "qwen3",
+      "parameters": "4.0B",
+      "quantization": "Q4_K_M",
+      "capabilities": ["tools", "thinking", "completion"],
+      "smoke_test": {
+        "status": "passed",
+        "prompt": "Reply with OK only",
+        "response": "OK",
+        "thinking": null,
+        "elapsed_seconds": 3.51
+      }
+    }
+  ],
+  "configuration_hashes": {
+    "config/experiment.json": {
+      "status": "unavailable",
+      "reason": "Task 2 creates this file; Task 1 must not invent its hash"
+    }
+  },
+  "dependency_installation": {
+    "status": "installed",
+    "venv_python": ".venv/bin/python (Python 3.12.7)",
+    "editable_installs": [
+      {"name": "haystack", "version": "3.2.0rc0", "source_path": "../../haystack", "commit_sha": "c7cb46c0f28ad1984f60e5d3e9404b124a221437"},
+      {"name": "llama-index-core", "version": "0.14.24", "source_path": "../../llama_index", "commit_sha": "d8021225eb7e7b276d5ceb476b0a4650240f27f8"}
+    ],
+    "imports_verified": true,
+    "import_check": "import llama_index; import haystack -> imports-ok; resolved inside .venv",
+    "pip_freeze_recorded": true,
+    "pip_freeze_artifact": "artifacts/raw/pip-freeze.txt"
+  }
+}

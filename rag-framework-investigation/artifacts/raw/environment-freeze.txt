@@ -1,0 +1,119 @@
+environment_freeze_version=1
+timestamp=2026-08-23T17:49:44Z
+investigation_root=/Users/dmondal/Documents/week2-fde-assignment/week2/rag-framework-investigation
+repository_root=/Users/dmondal/Documents/week2-fde-assignment
+[python]
+Python 3.12.7
+/Users/dmondal/Documents/week2-fde-assignment/week2/rag-framework-investigation/.venv/bin/python
+macOS-26.5.1-arm64-arm-64bit
+[pip_freeze]
+aiohappyeyeballs==2.7.1
+aiohttp==3.14.3
+aiosignal==1.4.0
+aiosqlite==0.22.1
+annotated-types==0.8.0
+anyio==4.14.2
+attrs==26.1.0
+backoff==2.2.1
+banks==2.5.0
+certifi==2026.7.22
+charset-normalizer==3.5.1
+click==8.4.2
+colorama==0.4.6
+dataclasses-json==0.6.7
+defusedxml==0.7.1
+Deprecated==1.3.1
+dirtyjson==1.0.8
+distro==1.9.0
+docstring_parser==0.18.0
+filetype==1.2.0
+frozenlist==1.8.0
+fsspec==2026.7.0
+greenlet==3.5.5
+griffe==2.2.0
+griffecli==2.2.0
+griffelib==2.2.0
+h11==0.16.0
+-e git+https://github.com/deepset-ai/haystack.git@c7cb46c0f28ad1984f60e5d3e9404b124a221437#egg=haystack_ai
+httpcore==1.0.9
+httpx==0.28.1
+idna==3.19
+iniconfig==2.3.0
+Jinja2==3.1.6
+jiter==0.16.0
+joblib==1.5.3
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+lazy_imports==1.2.0
+-e git+https://github.com/run-llama/llama_index.git@d8021225eb7e7b276d5ceb476b0a4650240f27f8#egg=llama_index
+llama-index-core==0.14.24
+llama-index-embeddings-openai==0.6.0
+llama-index-instrumentation==0.5.0
+llama-index-llms-openai==0.7.10
+llama-index-workflows==2.23.3
+MarkupSafe==3.0.3
+marshmallow==3.26.2
+more-itertools==11.1.0
+multidict==6.7.1
+mypy_extensions==1.1.0
+nest-asyncio==1.6.0
+networkx==3.6.1
+nltk==3.10.3
+numpy==2.5.2
+openai==2.54.0
+packaging==26.3
+pillow==12.3.0
+pip==26.2.1
+platformdirs==4.11.3
+pluggy==1.6.0
+posthog==7.42.1
+propcache==0.5.2
+pydantic==2.13.4
+pydantic_core==2.46.4
+Pygments==2.21.0
+pytest==9.1.1
+python-dateutil==2.9.0.post0
+PyYAML==6.0.3
+referencing==0.37.0
+regex==2026.7.19
+requests==2.34.2
+rpds-py==2026.6.3
+setuptools==84.0.0
+six==1.17.0
+sniffio==1.3.1
+SQLAlchemy==2.0.52
+tenacity==9.1.4
+tiktoken==0.14.0
+tinytag==2.3.0
+tqdm==4.70.0
+typing-inspect==0.9.0
+typing-inspection==0.4.4
+typing_extensions==4.16.0
+urllib3==2.7.0
+wrapt==2.3.0
+yarl==1.24.5
+[ollama]
+ollama version is 0.32.13
+NAME                             ID              SIZE      MODIFIED     
+qwen3:4b-instruct-2507-q4_K_M    0edcdef34593    2.5 GB    28 hours ago    
+nomic-embed-text:latest          0a109f422b47    274 MB    29 hours ago    
+qwen3:4b-instruct                0edcdef34593    2.5 GB    7 days ago      
+[ollama_show:nomic-embed-text-hf:latest]
+Error: model 'nomic-embed-text-hf:latest' not found
+[ollama_show:qwen3-4b-instruct-2507-hf:latest]
+Error: model 'qwen3-4b-instruct-2507-hf:latest' not found
+[repositories]
+[haystack]
+path=/Users/dmondal/Documents/week2-fde-assignment/haystack
+remote=https://github.com/deepset-ai/haystack.git
+sha=c7cb46c0f28ad1984f60e5d3e9404b124a221437
+branch=main
+[llama_index]
+path=/Users/dmondal/Documents/week2-fde-assignment/llama_index
+remote=https://github.com/run-llama/llama_index.git
+sha=d8021225eb7e7b276d5ceb476b0a4650240f27f8
+branch=main
+[configuration_hashes]
+6b4f9be6d3f3e8ecb1b627d72e7069799ce601f9cdc52f987264ba8b3601b426  /Users/dmondal/Documents/week2-fde-assignment/week2/rag-framework-investigation/config/experiment.json
+42fe660aec2dd314151a37641fa7c2f2d6b0de7a7a6450c99e642fb542dabaf3  /Users/dmondal/Documents/week2-fde-assignment/week2/rag-framework-investigation/config/environment-manifest.json
+5c33a5e6722740f4acf44db6fc0777dc34142a01050ac83ee83e0eb8f08fdd03  /Users/dmondal/Documents/week2-fde-assignment/week2/rag-framework-investigation/config/repository-manifest.json
