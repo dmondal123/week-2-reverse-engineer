@@ -11,11 +11,21 @@
   "boundary_policy": "fixed_token_window",
   "include_front_matter": true,
   "retrieval": {
-    "retriever_conditions": ["bm25", "ollama_dense"],
+    "retriever_conditions": [
+      "bm25",
+      "ollama_dense"
+    ],
     "top_k": 5,
     "score_order": "descending",
     "tie_break_rule": "score_desc_then_chunk_id_asc",
-    "metadata_filter": {"field": "status", "allowed_values": ["current", "obsolete"], "note": "retrieval indexes both statuses so the obsolete-source trap is answerable; forbidden sources are excluded at citation scoring via eval-case forbidden_source_ids"}
+    "metadata_filter": {
+      "field": "status",
+      "allowed_values": [
+        "current",
+        "obsolete"
+      ],
+      "note": "retrieval indexes both statuses so the obsolete-source trap is answerable; forbidden sources are excluded at citation scoring via eval-case forbidden_source_ids"
+    }
   },
   "reranking": {
     "enabled": false,
@@ -28,10 +38,10 @@
     "citation_mode": "source_id_and_chunk_id"
   },
   "models": {
-    "embedding_model": "nomic-embed-text-hf:latest",
-    "embedding_ollama_id": "e6895cfb76ea",
-    "generation_model": "qwen3-4b-instruct-2507-hf:latest",
-    "generation_ollama_id": "83f94de04436"
+    "embedding_model": "nomic-embed-text",
+    "embedding_ollama_id": "0a109f422b47",
+    "generation_model": "qwen3:4b-instruct-2507-q4_K_M",
+    "generation_ollama_id": "0edcdef34593"
   },
   "generation": {
     "temperature": 0,

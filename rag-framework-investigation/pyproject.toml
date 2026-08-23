@@ -14,6 +14,14 @@ dev = [
     "pytest>=8.0",
     "ruff>=0.6",
 ]
+frameworks = [
+    # Pinned framework cores are installed editable from ../llama_index and
+    # ../haystack (see config/repository-manifest.json). These are the extra
+    # retrieval integrations required by both adapters (Task 5), pinned to
+    # the versions installed in .venv.
+    "llama-index-retrievers-bm25==0.7.1",
+    "rank_bm25==0.2.2",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
