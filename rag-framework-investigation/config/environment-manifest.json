@@ -10,9 +10,9 @@
   },
   "approved_models": [
     {
-      "ollama_name": "nomic-embed-text",
+      "ollama_name": "nomic-embed-text:latest",
       "source": "ollama library (corrected to live server inventory, Task 5 review)",
-      "ollama_id": "0a109f422b47",
+      "ollama_digest_sha256": "0a109f422b47e3a30ba2b10eca18548e944e8a23073ee3f3e947efcf3c45e59f",
       "architecture": "nomic-bert",
       "embedding_length": 768,
       "quantization": "Q4_K_M",
@@ -26,7 +26,7 @@
     {
       "ollama_name": "qwen3:4b-instruct-2507-q4_K_M",
       "source": "ollama library (corrected to live server inventory, Task 5 review)",
-      "ollama_id": "0edcdef34593",
+      "ollama_digest_sha256": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
       "architecture": "qwen3",
       "parameters": "4.0B",
       "quantization": "Q4_K_M",
@@ -70,10 +70,25 @@
     "imports_verified": true,
     "import_check": "import llama_index; import haystack -> imports-ok; resolved inside .venv",
     "pip_freeze_recorded": true,
-    "pip_freeze_artifact": "artifacts/raw/pip-freeze.txt"
+    "pip_freeze_artifact": "artifacts/raw/pip-freeze.txt",
+    "additional_installs": [
+      {
+        "package": "llama-index-retrievers-bm25",
+        "version": "0.7.1",
+        "added_in": "Task 5",
+        "purpose": "BM25Retriever for LlamaIndex adapter"
+      },
+      {
+        "package": "rank_bm25",
+        "version": "0.2.2",
+        "added_in": "Task 5",
+        "purpose": "BM25 scoring backend"
+      }
+    ],
+    "pins_recorded_in": "pyproject.toml [project.optional-dependencies].frameworks"
   },
   "model_inventory_correction": {
-    "corrected_in": "Task 5 code review",
-    "reason": "original entries named custom -hf imports not present on the running Ollama server; names/digests now match `ollama list` at review time"
+    "corrected_in": "Task 5 code review (commit follow-up)",
+    "reason": "original entries named custom -hf imports that were never present on the running Ollama server; names and full digests now match `ollama list` (via /api/tags) and embedding dimensionality was re-verified via /api/embed"
   }
 }
