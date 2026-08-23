@@ -52,7 +52,7 @@ Human-maintained task totals belong here. Record `unavailable` when Codex does n
 | 2 | `gpt-5.6-luna` medium | 1,15,302 | 15,12,418 | 20,286 (reasoning 5,647) | 1,35,588 | Human-supplied exact counters |
 | 3 | `gpt-5.6-terra` medium | 88,081 | 42,78,506 | 21,683 (reasoning 5,331) | 1,09,764 | Human-supplied exact counters |
 | 4 | `ox-alpha` | 4,54,547 | unavailable | 60,320 (reasoning unavailable) | 5,14,867 | Human-supplied exact counters; cached input not exposed by this product |
-| 5 | `gpt-5.6-terra` medium | | | | | |
+| 5 | `ox-alpha` | 1,39,828 | unavailable | 44,150 (reasoning unavailable) | 1,83,978 | Human-supplied exact counters; cached input not exposed by this product |
 | 6 | `gpt-5.6-luna` medium | | | | | |
 | 7 | `gpt-5.6-terra` medium | | | | | |
 | 8 draft | `gpt-5.6-luna` medium | | | | | |
