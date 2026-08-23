@@ -1,0 +1,5 @@
+Contractors do not use the employee reimbursement program and may only bill a business expense if the signed statement of work explicitly marks that expense as reimbursable; otherwise, the contractor bears the cost [4]. Therefore, contractors cannot expense hotel Wi-Fi under the employee reimbursement program.
+
+Regarding approval requirements, the context does not specify whether approval is required for contractors to expense hotel Wi-Fi. The approval rule (Rule ID AP-50) applies to reimbursement claims above $50, but it is not stated whether this rule extends to contractors or applies only to employees [1]. Since there is no explicit information about approval requirements for contractor hotel Wi-Fi expenses, there is insufficient evidence to determine when approval is required for contractors.
+
+Final answer: Contractors cannot expense hotel Wi-Fi under the employee reimbursement program. There is insufficient evidence to determine when approval is required for contractors to expense hotel Wi-Fi. [4]

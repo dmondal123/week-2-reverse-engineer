@@ -1,0 +1,13 @@
+[
+  {
+    "position": 1,
+    "source_id": "approval-matrix",
+    "document_id": "b3ad1862e34aba62ac605dd86f1cf5496dd84b9d20ab2abbf7c0470114dae61e",
+    "chunk_id": "117c37f8b576e971468cbe8c6e8c77a476d76fb6610fd7ffa33476efc7f4fecc",
+    "span": [
+      132,
+      290
+    ],
+    "release_id": "v1"
+  }
+]
