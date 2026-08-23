@@ -345,35 +345,35 @@ Update: `evidence/ledger.csv`
 
 Update: `evidence/hypotheses.md`
 
-- [ ] **Step 1: Start from one public observable capability per path**
+- [x] **Step 1: Start from one public observable capability per path**
 
 For each framework, locate the documented/public call that indexes documents and the call that executes retrieval. Record these entry points first; do not begin with directory summaries.
 
-- [ ] **Step 2: Trace index-time ownership**
+- [x] **Step 2: Trace index-time ownership**
 
 Follow public call -> parser/converter -> splitter -> identity assignment -> embedding -> store. Record class/function, exact SHA-linked line, input/output types, defaults, configuration resolution, state writes, tests, callbacks, and recovery behavior.
 
-- [ ] **Step 3: Trace query-time ownership**
+- [x] **Step 3: Trace query-time ownership**
 
 Follow public query call -> configuration -> retrieval/filtering/scoring -> reranking -> packing -> generation -> citation. Record the same evidence fields.
 
-- [ ] **Step 4: Audit hidden/default state explicitly**
+- [x] **Step 4: Audit hidden/default state explicitly**
 
 Search and inspect LlamaIndex `Settings`, transformations, callbacks, storage context, caches, and serialization. Inspect Haystack component defaults, pipeline wiring, stores, filters, concurrency, serialization, and tracing. Record environment-variable reads and defaults for chunking, top-k, scores, embeddings, and metadata filters.
 
-- [ ] **Step 5: Complete the provenance matrix**
+- [x] **Step 5: Complete the provenance matrix**
 
 Create one row per framework/stage/field. Mark each of the design's 12 identity and provenance fields as `preserved`, `transformed`, `synthesized`, or `lost`, with an evidence ID.
 
-- [ ] **Step 6: Reach the minimum evidence breadth**
+- [x] **Step 6: Reach the minimum evidence breadth**
 
 Capture at least 12 commit-bound references, balanced across frameworks and spanning implementation, tests, and configuration. Capture two history, issue, or ADR references. Triangulate every paper-level architectural claim with two evidence forms when possible.
 
-- [ ] **Step 7: Record counterevidence**
+- [x] **Step 7: Record counterevidence**
 
 Actively test the rejection condition for the current favored hypothesis. Update at least one hypothesis to `WEAKENED` or `REJECTED` only when a cited source or runtime artifact justifies it.
 
-- [ ] **Step 8: Commit the source reconstruction**
+- [x] **Step 8: Commit the source reconstruction**
 
 ```bash
 git add week2/rag-framework-investigation/evidence

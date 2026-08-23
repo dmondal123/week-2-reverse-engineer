@@ -28,7 +28,9 @@ Scope: these are predictions before framework-source tracing or runtime experime
 
 **Rejection condition:** The traced graph does not improve stage observability relative to the alternative, or every relevant converter/splitter demonstrably preserves identity and metadata without an unrecorded transformation.
 
-**Status:** OPEN
+**Status:** WEAKENED (source-level counterevidence, 2026-08-23)
+
+**Counterevidence:** Tracing at pinned SHAs shows the observability half holds — Haystack's pipeline executes an explicitly connected graph (`core/pipeline/pipeline.py:118,200`, EV-T4-010) and splitter/retriever defaults are constructor-local and inspectable (`document_splitter.py:57-59`, `bm25_retriever.py:45-46`, EV-T4-009). However, the transformation risk is stronger than predicted: `DocumentSplitter` creates children as new Documents whose ids are regenerated from child content while the parent id is dropped (`document_splitter.py:268,332`, EV-T4-007), and Haystack's `Document.id` fingerprint includes the embedding vector (`dataclasses/document.py:110-116`, EV-T4-008), so id stability depends on embedding identity — a transformation not surfaced by the graph.
 
 **Confidence before trace:** medium
 
