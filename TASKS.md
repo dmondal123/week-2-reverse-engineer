@@ -325,7 +325,7 @@ a query captures one active release and rejects chunks from any other release.
 
 Promotion must write a temporary pointer in the same directory, flush and fsync, then call `os.replace(temp_path, active_path)`. It must refuse promotion unless validation_status == "passed" and all manifest fields match observed build artifacts.
 
-- [ ] **Step 7: Run focused tests and commit**
+- [x] **Step 7: Run focused tests and commit**
 
 ```bash
 .venv/bin/python -m pytest tests/test_identity.py tests/test_trace_contract.py tests/test_release.py -q
