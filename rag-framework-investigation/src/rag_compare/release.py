@@ -10,6 +10,8 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
+from rag_compare import identity
+
 
 class ReleaseValidationError(ValueError):
     """Raised when a release manifest does not match its build artifacts."""
@@ -21,7 +23,12 @@ class MixedReleaseError(ValueError):
 
 @dataclass(frozen=True)
 class BuildArtifacts:
-    """The values observed while building a release, excluding its pointer metadata."""
+    """The values observed while building a release, excluding its pointer metadata.
+
+    ``index`` describes the stored index contents via a chunk-inventory
+    artifact: without it, validation could accept a release whose corpus
+    files are complete but whose index is empty or partial.
+    """
 
     corpus: dict
     schema_version: object
@@ -31,6 +38,7 @@ class BuildArtifacts:
     framework: dict
     document_count: int
     chunk_count: int
+    index: dict
 
 
 @dataclass(frozen=True)
@@ -49,6 +57,7 @@ _OBSERVED_FIELDS = (
     "framework",
     "document_count",
     "chunk_count",
+    "index",
 )
 
 _REQUIRED_FIELDS = (
@@ -64,6 +73,7 @@ _REQUIRED_NESTED_FIELDS = {
     "chunker": ("identity", "size", "overlap", "config_sha256"),
     "embedding": ("name", "ollama_digest", "dimensions", "distance_metric"),
     "framework": ("commit", "package", "adapter"),
+    "index": ("chunk_inventory_sha256", "chunk_count"),
 }
 
 _LOWER_HEX = frozenset("0123456789abcdef")
@@ -237,6 +247,45 @@ def _discovered_corpus_files(release_dir: Path, corpus_dir: Path) -> dict[str, s
     return discovered
 
 
+INDEX_INVENTORY_RELPATH = "index/chunk-inventory.json"
+
+
+def build_chunk_inventory(chunks: list[dict]) -> list[dict]:
+    """Deterministic per-chunk inventory of what an index build stored."""
+    entries = [
+        {
+            "chunk_id": chunk["chunk_id"],
+            "source_id": chunk["source_id"],
+            "document_id": chunk["document_id"],
+            "span": list(chunk["span"]),
+            "text_sha256": identity.sha256_bytes(chunk["text"].encode("utf-8")),
+        }
+        for chunk in chunks
+    ]
+    entries.sort(key=lambda entry: entry["chunk_id"])
+    return entries
+
+
+def canonical_inventory_bytes(entries: list[dict]) -> bytes:
+    payload = json.dumps(entries, sort_keys=True, separators=(",", ":"))
+    return payload.encode("utf-8")
+
+
+def write_index_inventory(release_dir: str | Path, chunks: list[dict]) -> str:
+    """Write the chunk-inventory artifact into a release directory.
+
+    Returns the SHA-256 recorded in the manifest's ``index`` block. A release
+    whose directory lacks this file cannot pass validation, so an empty or
+    partial index can never be promoted even when its corpus files match.
+    """
+    entries = build_chunk_inventory(chunks)
+    inventory_path = Path(release_dir) / INDEX_INVENTORY_RELPATH
+    inventory_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = canonical_inventory_bytes(entries)
+    inventory_path.write_bytes(payload)
+    return hashlib.sha256(payload).hexdigest()
+
+
 def validate_release(
     release_dir: str | Path,
     manifest: Mapping[str, object],
@@ -291,7 +340,99 @@ def validate_release(
         if discovered_files[path] != expected_hash:
             raise ReleaseValidationError(f"corpus file hash does not match for {path}")
 
+    _validate_index_inventory(release_dir_path, manifest)
+
     return ValidatedRelease(release_id)
+
+
+def _validate_index_inventory(release_dir_path: Path, manifest: Mapping) -> None:
+    """Validate the stored index contents, not just the corpus files.
+
+    Checks, in order:
+
+    1. the inventory artifact exists and matches its manifest hash;
+    2. its entry count equals both declared counts;
+    3. every entry's identity recomputes from the on-disk corpus under the
+       same contract the adapters used at build time — so stale or foreign
+       chunk ids cannot pass even when hashes happen to line up.
+    """
+    from rag_compare import identity as identity_module
+    from rag_compare.adapters import base as _adapter_base
+
+    index_block = manifest["index"]
+    inventory_rel = INDEX_INVENTORY_RELPATH
+    inventory_path = release_dir_path / inventory_rel
+    if not inventory_path.is_file():
+        raise ReleaseValidationError(
+            "index chunk inventory is missing: "
+            "the release directory stores no verifiable index artifact"
+        )
+    payload = inventory_path.read_bytes()
+    if hashlib.sha256(payload).hexdigest() != index_block["chunk_inventory_sha256"]:
+        raise ReleaseValidationError("index chunk inventory hash does not match")
+    try:
+        entries = json.loads(payload.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ReleaseValidationError("index chunk inventory is unreadable") from error
+    if not isinstance(entries, list) or not all(
+        isinstance(entry, Mapping) for entry in entries
+    ):
+        raise ReleaseValidationError("index chunk inventory must be a list of mappings")
+    if len(entries) != int(manifest["chunk_count"]):
+        raise ReleaseValidationError(
+            "index chunk inventory count does not match manifest chunk_count"
+        )
+    if len(entries) != int(index_block["chunk_count"]):
+        raise ReleaseValidationError(
+            "index chunk inventory count does not match manifest index.chunk_count"
+        )
+    chunk_ids = [entry.get("chunk_id") for entry in entries]
+    if len(set(chunk_ids)) != len(chunk_ids):
+        raise ReleaseValidationError(
+            "index chunk inventory contains duplicate chunk ids"
+        )
+
+    # Recompute expected identities from the validated corpus files.
+    corpus_dir = _corpus_root(release_dir_path)
+    version_field = (
+        "source_version"
+        if int(manifest["schema_version"]) == 2
+        else "policy_version"
+    )
+    expected_by_source: dict[str, object] = {}
+    for relative in sorted(_discovered_corpus_files(release_dir_path, corpus_dir)):
+        absolute = release_dir_path / PurePosixPath(relative)
+        parsed = _adapter_base.parse_markdown_file(absolute)
+        chunk = _adapter_base.make_normalized_chunk(
+            parsed, manifest["release_id"], version_field
+        )
+        expected_by_source[parsed.source_id] = chunk
+
+    declared_sources = {entry.get("source_id") for entry in entries}
+    if declared_sources != set(expected_by_source):
+        raise ReleaseValidationError(
+            "index chunk inventory source set does not match the corpus files"
+        )
+    for entry in entries:
+        chunk = expected_by_source[entry["source_id"]]
+        if entry["chunk_id"] != chunk["chunk_id"]:
+            raise ReleaseValidationError(
+                "inventory chunk id does not match the contract-derived id for "
+                + str(entry["source_id"])
+            )
+        expected_text_sha = identity_module.sha256_bytes(
+            chunk["text"].encode("utf-8")
+        )
+        if entry.get("text_sha256") != expected_text_sha:
+            raise ReleaseValidationError(
+                "inventory text hash does not match the corpus body for "
+                + str(entry["source_id"])
+            )
+        if list(entry.get("span", [])) != list(chunk["span"]):
+            raise ReleaseValidationError(
+                "inventory span does not match the corpus body for "
+                + str(entry["source_id"])
+            )
 
 
 def promote_release(

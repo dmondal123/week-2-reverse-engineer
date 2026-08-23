@@ -85,15 +85,26 @@ class LlamaIndexAdapter(BaseAdapter):
         trace,
     ) -> BuildResult:
         release_id = str(manifest["corpus_version"])
+        self._latest_vectors: list[list[float]] = []
 
         def embed_stage(chunks, rid):
-            return self._embed_chunks(chunks, rid, trace)
+            result = self._embed_chunks(chunks, rid, trace)
+            # Vectors are reused at store time so nodes enter the index with
+            # their embedding already attached; otherwise VectorStoreIndex
+            # would silently re-embed every node (double embedding cost and
+            # misattributed store-stage latency).
+            self._latest_vectors = result.vectors
+            return result
 
         def store_stage(chunks, rid):
+            vectors = self._latest_vectors
+            if len(vectors) != len(chunks):
+                raise ValueError("embed stage did not return one vector per chunk")
             nodes = [
                 TextNode(
                     id_=chunk["chunk_id"],
                     text=chunk["text"],
+                    embedding=list(vector),
                     metadata={
                         "source_id": chunk["source_id"],
                         "document_id": chunk["document_id"],
@@ -101,7 +112,7 @@ class LlamaIndexAdapter(BaseAdapter):
                         "span": chunk["span"],
                     },
                 )
-                for chunk in chunks
+                for chunk, vector in zip(chunks, vectors, strict=True)
             ]
             # Explicit embed_model: avoids Settings.embed_model fallback (LI-2).
             index = VectorStoreIndex(

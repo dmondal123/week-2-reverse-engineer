@@ -35,7 +35,7 @@ versioned corpus
 -> generate -> cite
 ```
 
-Every arrow is an observable boundary. Each stage emits a JSONL trace event with its input identities, output identities, resolved configuration, duration, ownership, and source location. Framework-native parsing, chunking, indexing, and retrieval are used so the comparison reveals their real abstractions. A small normalization layer converts framework outputs into shared trace records.
+Every arrow is an observable boundary. Each stage emits a JSONL trace event with its input identities, output identities, resolved configuration, duration, ownership, and source location. Parsing, chunking, and identity assignment run in a shared normalization layer used verbatim by both adapters so that corpus preparation cannot differ between frameworks; indexing and retrieval use framework-native components so the comparison reveals their real abstractions. A small normalization layer converts framework outputs into shared trace records.
 
 The controlled experiment changes only the retriever:
 

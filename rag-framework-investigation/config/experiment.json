@@ -48,12 +48,18 @@
     "top_p": 1,
     "max_output_tokens": 256,
     "seed": 0,
-    "prompt_template": "Answer only from the supplied context. Cite each policy source_id. If the context does not establish the answer, say insufficient evidence."
+    "prompt_template": "Answer only from the supplied context. After each claim, cite the supporting context blocks in brackets like [1]. Cite every block you rely on. If the context does not establish the answer, say insufficient evidence."
   },
-  "prompt_sha256": "2f11f9b2571d6d3a05b58c018e96e7d388783b2699374914c9acdfc698c2d16e",
+  "prompt_sha256": "e029718bc4549c8c7cf270fefa7f245f0f0e50c49553c7882ec21394a731c50b",
   "identity": {
     "document_id_rule": "sha256('document' + U+001F + source_id + U+001F + content_sha256)",
     "chunk_id_rule": "sha256('chunk' + U+001F + document_id + U+001F + start + U+001F + end + U+001F + chunk_text)",
     "text_encoding": "utf-8"
+  },
+  "quality_gates": {
+    "min_recall_at_k_per_case": 0.5,
+    "max_forbidden_source_violation_cases": 0,
+    "require_release_consistency_all_cases": true,
+    "note": "gates frozen before rerun; citation-quality metrics are reported but deliberately not gated until the citation behavior is diagnosed"
   }
 }

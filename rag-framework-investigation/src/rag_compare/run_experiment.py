@@ -210,6 +210,46 @@ def validate_controls(
     }
 
 
+def evaluate_quality_gates(csv_rows: list[dict], config: dict) -> dict:
+    """Fail-closed quality gates; control validation alone is not enough.
+
+    A run whose controls matched can still be a bad run (empty citations,
+    forbidden sources cited, inconsistent releases). Gates come from the
+    frozen ``config['quality_gates']`` block so they are pinned before
+    execution, never tuned to the results afterwards.
+    """
+    gates = config.get("quality_gates")
+    if not gates:
+        return {"passed": True, "failures": [], "note": "no quality gates configured"}
+    failures: list[str] = []
+
+    min_recall = float(gates.get("min_recall_at_k_per_case", 0.0))
+    for row in csv_rows:
+        if float(row["recall_at_k"]) < min_recall:
+            failures.append(
+                f"{row['condition_id']}/{row['case_id']}: recall_at_k "
+                f"{row['recall_at_k']} < gate {min_recall}"
+            )
+
+    if "max_forbidden_source_violation_cases" in gates:
+        allowed = int(gates["max_forbidden_source_violation_cases"])
+        violating = [r for r in csv_rows if float(r["forbidden_source_violation"]) > 0]
+        if len(violating) > allowed:
+            failures.append(
+                f"forbidden-source violation in {len(violating)} case runs "
+                f"> gate {allowed}"
+            )
+
+    if gates.get("require_release_consistency_all_cases"):
+        bad = [r for r in csv_rows if float(r["release_consistency"]) != 1.0]
+        if bad:
+            failures.append(
+                f"release_consistency != 1.0 in {len(bad)} case runs"
+            )
+
+    return {"passed": not failures, "failures": failures}
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true", help="freeze manifest only")
@@ -328,12 +368,15 @@ def main(argv: list[str] | None = None) -> int:
         stderr_tee.handle.close()
 
     control = validate_controls(builds, frozen_manifest, len(cases), top_k)
+    gates = evaluate_quality_gates(csv_rows, config)
 
     metric_keys = [k for k in csv_rows[0] if k.startswith(("recall", "mrr"))]
     metric_keys += [
         k
         for k in csv_rows[0]
-        if k.startswith(("forbidden", "citation_", "release_", "total_latency"))
+        if k.startswith(
+            ("forbidden", "citation_", "required_phrase_", "release_", "total_latency")
+        )
         or k.startswith("latency_")
     ]
     summaries = []
@@ -358,9 +401,15 @@ def main(argv: list[str] | None = None) -> int:
             }
         )
 
+    if control["passed"] and gates["passed"]:
+        status = "passed"
+    elif not control["passed"]:
+        status = "control_failed"
+    else:
+        status = "quality_gates_failed"
     summary = {
         "run_id": run_id,
-        "status": "passed" if control["passed"] else "control_failed",
+        "status": status,
         "observation_kind": "observed",
         "created_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "wall_clock_seconds": round(wall_seconds, 3),
@@ -368,6 +417,7 @@ def main(argv: list[str] | None = None) -> int:
         "input_hashes": frozen_manifest["input_hashes"],
         "conditions": summaries,
         "control_validation": control,
+        "quality_gates": gates,
         "cases": [c["case_id"] for c in cases],
         "results_csv": "artifacts/results/controlled-results.csv",
         "results_json": "artifacts/results/controlled-summary.json",
@@ -386,12 +436,12 @@ def main(argv: list[str] | None = None) -> int:
         json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     print(f"[task6] control_validation passed={control['passed']}")
-    if control["failures"]:
-        for failure in control["failures"]:
-            print(f"[task6] CONTROL FAILURE: {failure}", file=sys.stderr)
+    print(f"[task6] quality_gates passed={gates['passed']}")
+    for failure in control["failures"] + gates["failures"]:
+        print(f"[task6] FAILURE: {failure}", file=sys.stderr)
     print(f"[task6] wrote controlled-results.csv ({len(csv_rows)} rows)")
     print(f"[task6] wrote controlled-summary.json status={summary['status']}")
-    return 0 if control["passed"] else 1
+    return 0 if control["passed"] and gates["passed"] else 1
 
 
 if __name__ == "__main__":

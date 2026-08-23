@@ -129,6 +129,11 @@ def test_build_release_produces_validatable_manifest(tmp_path, adapter_cls):
     for md_file in (PROJECT_ROOT / "corpus" / "v1").glob("*.md"):
         shutil.copy(md_file, release_dir / "corpus" / "v1" / md_file.name)
 
+    # The index artifact is part of the release: write the chunk inventory.
+    from rag_compare.release import write_index_inventory
+
+    write_index_inventory(release_dir, result.chunks)
+
     # Manifest must validate against observed artifacts and on-disk corpus.
     validated = validate_release(release_dir, manifest, result.observed)
     assert validated.release_id == "v1"

@@ -16,6 +16,7 @@ frameworks are the traced framework-specific index/retrieve components.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import time
@@ -28,7 +29,11 @@ from pathlib import Path, PurePosixPath
 from rag_compare import identity
 from rag_compare.contracts import StageEvent
 from rag_compare.ollama import OllamaClient, embedding_identity_digest
-from rag_compare.release import BuildArtifacts
+from rag_compare.release import (
+    BuildArtifacts,
+    build_chunk_inventory,
+    canonical_inventory_bytes,
+)
 from rag_compare.rerank import pack_context
 
 # Identical stage order is asserted for both adapters by tests/test_adapters.py.
@@ -187,11 +192,15 @@ def make_normalized_chunk(
     version_field: str,
 ) -> dict:
     """Build the normalized whole-document chunk with contract-stable identity."""
-    document_id = identity.document_id(parsed.source_id, parsed.content_sha256)
-    text = parsed.body
-    chunk_identifier = identity.chunk_id(
-        document_id, parsed.body_start, parsed.body_end, text
-    )
+    return assign_identity(chunk_structure(parsed, release_id, version_field))
+
+
+def chunk_structure(
+    parsed: ParsedDocument,
+    release_id: str,
+    version_field: str,
+) -> dict:
+    """Split-stage output: text, span, and metadata — no identities yet."""
     metadata = {
         "title": parsed.title,
         "status": parsed.status,
@@ -200,14 +209,33 @@ def make_normalized_chunk(
     }
     return {
         "source_id": parsed.source_id,
-        "document_id": document_id,
-        "chunk_id": chunk_identifier,
-        "text": text,
+        "text": parsed.body,
         "span": [parsed.body_start, parsed.body_end],
+        "content_sha256": parsed.content_sha256,
         "score": 0.0,
         "rank": 0,
         "metadata": metadata,
         "release_id": release_id,
+    }
+
+
+def assign_identity(structure: dict) -> dict:
+    """Identity-stage output: contract-stable document/chunk ids on a structure."""
+    document_id = identity.document_id(
+        structure["source_id"], structure["content_sha256"]
+    )
+    start, end = structure["span"]
+    text = structure["text"]
+    return {
+        "source_id": structure["source_id"],
+        "document_id": document_id,
+        "chunk_id": identity.chunk_id(document_id, start, end, text),
+        "text": text,
+        "span": [start, end],
+        "score": structure["score"],
+        "rank": structure["rank"],
+        "metadata": structure["metadata"],
+        "release_id": structure["release_id"],
     }
 
 
@@ -293,16 +321,16 @@ class BaseAdapter(ABC):
     ) -> list[dict]:
         """Run parse/split/identity stages shared verbatim by both frameworks."""
 
-
-        documents = load_corpus(corpus_path, corpus_manifest)
-
+        # parse: timer covers the real file reads and front-matter parsing.
         started = time.perf_counter()
+        documents = load_corpus(corpus_path, corpus_manifest)
+        parse_ms = (time.perf_counter() - started) * 1000.0
         self._emit(
             trace,
             stage="parse",
             component="rag_compare.adapters.base.parse_markdown_file",
             source_reference="corpus/v1/manifest.json identity_contract",
-            duration_ms=(time.perf_counter() - started) * 1000.0,
+            duration_ms=parse_ms,
             resolved_config={"include_front_matter_in_body": False},
             input_ids=[doc.source_id for doc in documents],
             output_ids=[doc.source_id for doc in documents],
@@ -314,28 +342,33 @@ class BaseAdapter(ABC):
             if corpus_manifest.get("schema_version") == 2  # type: ignore[attr-defined]
             else "policy_version"
         )
+        # split: chunk boundaries, text, spans, and metadata — no identities yet.
         started = time.perf_counter()
-        chunks = [
-            make_normalized_chunk(doc, release_id, version_field) for doc in documents
+        structures = [
+            chunk_structure(doc, release_id, version_field) for doc in documents
         ]
+        split_ms = (time.perf_counter() - started) * 1000.0
         self._emit(
             trace,
             stage="split",
             component="whole_document_token_window",
             source_reference="corpus manifest chunk_plan",
-            duration_ms=(time.perf_counter() - started) * 1000.0,
+            duration_ms=split_ms,
             resolved_config=dict(self.config["chunking"]),  # type: ignore[arg-type]
             input_ids=[doc.source_id for doc in documents],
-            output_ids=[chunk["chunk_id"] for chunk in chunks],
+            output_ids=[structure["source_id"] for structure in structures],
             release_id=release_id,
         )
+        # identity: contract-stable document/chunk id assignment only.
         started = time.perf_counter()
+        chunks = [assign_identity(structure) for structure in structures]
+        identity_ms = (time.perf_counter() - started) * 1000.0
         self._emit(
             trace,
             stage="identity",
             component="rag_compare.identity",
             source_reference="src/rag_compare/identity.py",
-            duration_ms=(time.perf_counter() - started) * 1000.0,
+            duration_ms=identity_ms,
             resolved_config={
                 "document_id_rule": self.config["identity"]["document_id_rule"],  # type: ignore[index]
                 "chunk_id_rule": self.config["identity"]["chunk_id_rule"],  # type: ignore[index]
@@ -379,13 +412,23 @@ class BaseAdapter(ABC):
 
         started = time.perf_counter()
         store_stage_callback(chunks, release_id)
+        store_ms = (time.perf_counter() - started) * 1000.0
+        inventory_entries = build_chunk_inventory(chunks)
+        inventory_sha256 = hashlib.sha256(
+            canonical_inventory_bytes(inventory_entries)
+        ).hexdigest()
         self._emit(
             trace,
             stage="store",
             component=self.store_component_name(),
             source_reference=self.store_source_reference(),
-            duration_ms=(time.perf_counter() - started) * 1000.0,
-            resolved_config={"namespace": release_id, "duplicate_policy": "reject"},
+            duration_ms=store_ms,
+            resolved_config={
+                "namespace": release_id,
+                "duplicate_policy": "reject",
+                "chunk_inventory_sha256": inventory_sha256,
+                "chunk_count": len(inventory_entries),
+            },
             input_ids=[chunk["chunk_id"] for chunk in chunks],
             output_ids=[chunk["chunk_id"] for chunk in chunks],
             release_id=release_id,
@@ -394,6 +437,10 @@ class BaseAdapter(ABC):
         manifest = self._assemble_manifest(
             corpus_manifest, chunks, release_id, embed_delta
         )
+        manifest["index"] = {
+            "chunk_inventory_sha256": inventory_sha256,
+            "chunk_count": len(inventory_entries),
+        }
         observed = BuildArtifacts(
             corpus={
                 "version": manifest["corpus"]["version"],
@@ -406,6 +453,7 @@ class BaseAdapter(ABC):
             framework=manifest["framework"],
             document_count=manifest["document_count"],
             chunk_count=manifest["chunk_count"],
+            index=manifest["index"],
         )
         return BuildResult(manifest=manifest, observed=observed, chunks=chunks)
 
@@ -599,12 +647,34 @@ class BaseAdapter(ABC):
 
     def _generate(self, query_text: str, packed: list[dict]) -> tuple[str, list[dict]]:
         blocks = []
-        citations = []
+        by_position = {}
         for position, chunk in enumerate(packed, start=1):
             blocks.append(
                 f"[{position}] source_id={chunk['source_id']} "
                 f"chunk_id={chunk['chunk_id']}\n{chunk['text']}"
             )
+            by_position[position] = chunk
+        prompt = (
+            f"{self.prompt_template}\n\nContext:\n"
+            + "\n\n".join(blocks)
+            + "\n\nQuestion: "
+            + query_text
+        )
+        answer = self.client.generate(
+            self.generation_model, prompt, **self.generation_options
+        )
+        # Citations are model-derived: only blocks the answer actually cites
+        # (via [n] markers) become citations, in first-mention order. An
+        # answer citing nothing produces no citations, so downstream metrics
+        # measure what the model cited — not what was packed.
+        citations = []
+        seen = set()
+        for marker in re.findall(r"\[(\d+)\]", answer):
+            position = int(marker)
+            if position in seen or position not in by_position:
+                continue
+            seen.add(position)
+            chunk = by_position[position]
             citations.append(
                 {
                     "position": position,
@@ -615,15 +685,6 @@ class BaseAdapter(ABC):
                     "release_id": chunk["release_id"],
                 }
             )
-        prompt = (
-            f"{self.prompt_template}\n\nContext:\n"
-            + "\n\n".join(blocks)
-            + "\n\nQuestion: "
-            + query_text
-        )
-        answer = self.client.generate(
-            self.generation_model, prompt, **self.generation_options
-        )
         return answer, citations
 
     def _enforce_release(self, active_release, branches):

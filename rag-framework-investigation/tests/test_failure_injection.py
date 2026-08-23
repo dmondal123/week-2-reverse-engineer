@@ -50,6 +50,7 @@ from rag_compare.release import (
     capture_active_release,
     filter_chunks_for_release,
     promote_release,
+    write_index_inventory,
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -220,6 +221,7 @@ def activate_v1(
         trace,
     )
     copy_corpus_files("v1", v1_dir)
+    write_index_inventory(v1_dir, build_v1.chunks)
     validated = promote_release(
         v1_dir, build_v1.manifest, build_v1.observed, pointer_path
     )
@@ -255,12 +257,14 @@ def inject_partial_v2(
             staging_corpus / Path(doc["path"]).name,
         )
     partial_input = {**v2_manifest, "documents": partial_docs}
-    adapter.build_release(staging_corpus, partial_input, trace)
+    partial_build = adapter.build_release(staging_corpus, partial_input, trace)
 
     # Stage the release directory with ONLY the files that were indexed; the
     # claimed manifest below asserts the FULL v2 document set anyway.
     staged_files = copy_corpus_files(V2_RELEASE_ID, v2_staging_dir, source_ids=half_ids)
     assert len(staged_files) == len(partial_docs)
+    # A realistic partial build also stores only what it indexed.
+    write_index_inventory(v2_staging_dir, partial_build.chunks)
 
     claimed_files = [
         {
@@ -282,6 +286,14 @@ def inject_partial_v2(
         "corpus": {"version": "v2", "files": claimed_files},
         "document_count": len(v2_manifest["documents"]),
         "chunk_count": len(v2_manifest["documents"]),
+        # Naive index claim: the partial build's own inventory digest, while
+        # chunk_count claims the FULL v2 set. Validation must reject this.
+        "index": {
+            "chunk_inventory_sha256": partial_build.manifest["index"][
+                "chunk_inventory_sha256"
+            ],
+            "chunk_count": len(v2_manifest["documents"]),
+        },
     }
     claimed_observed = BuildArtifacts(
         corpus=claimed_manifest["corpus"],
@@ -292,6 +304,7 @@ def inject_partial_v2(
         framework=claimed_manifest["framework"],
         document_count=claimed_manifest["document_count"],
         chunk_count=claimed_manifest["chunk_count"],
+        index=claimed_manifest["index"],
     )
 
     pointer_bytes_before = pointer_path.read_bytes()
@@ -355,6 +368,7 @@ def recover_and_promote_v2(
         PROJECT_ROOT / "corpus" / V2_RELEASE_ID, v2_manifest, trace
     )
     copy_corpus_files(V2_RELEASE_ID, v2_staging_dir)
+    write_index_inventory(v2_staging_dir, build_v2.chunks)
     promoted = promote_release(
         v2_staging_dir, build_v2.manifest, build_v2.observed, pointer_path
     )

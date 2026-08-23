@@ -12,6 +12,7 @@ from rag_compare.release import (
     filter_chunks_for_release,
     promote_release,
     validate_release,
+    write_index_inventory,
 )
 
 
@@ -19,13 +20,27 @@ def _sha256(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+_CORPUS_BODIES = {
+    "first.md": (
+        "---\nsource_id: first\ntitle: First\npolicy_version: v1\n"
+        "status: current\neffective_date: 2026-01-01\n---\n"
+        "First policy body text.\n"
+    ),
+    "second.md": (
+        "---\nsource_id: second\ntitle: Second\npolicy_version: v1\n"
+        "status: current\neffective_date: 2026-01-01\n---\n"
+        "Second policy body text.\n"
+    ),
+}
+
+
 def complete_release(tmp_path, release_id):
     release_dir = tmp_path / release_id
     corpus_dir = release_dir / "corpus"
     corpus_dir.mkdir(parents=True)
 
-    (corpus_dir / "first.md").write_text("first policy", encoding="utf-8")
-    (corpus_dir / "second.md").write_text("second policy", encoding="utf-8")
+    for name, body in _CORPUS_BODIES.items():
+        (corpus_dir / name).write_text(body, encoding="utf-8")
 
     files = [
         {"path": f"corpus/{path.name}", "sha256": _sha256(path)}
@@ -56,9 +71,28 @@ def complete_release(tmp_path, release_id):
         },
         "document_count": 2,
         "chunk_count": 2,
+        # A placeholder digest is replaced with the real inventory below.
+        "index": {"chunk_inventory_sha256": "0" * 64, "chunk_count": 2},
         "built_at": "2026-08-22T00:00:00Z",
         "validation_status": "passed",
     }
+
+    # Build the real contract-derived chunks exactly as adapters do, then
+    # write the matching inventory artifact into the release directory.
+    from rag_compare.adapters.base import (
+        make_normalized_chunk,
+        parse_markdown_file,
+    )
+
+    chunks = [
+        make_normalized_chunk(
+            parse_markdown_file(corpus_dir / name), release_id, "policy_version"
+        )
+        for name in sorted(_CORPUS_BODIES)
+    ]
+    manifest["index"]["chunk_inventory_sha256"] = write_index_inventory(
+        release_dir, chunks
+    )
 
     observed = BuildArtifacts(
         corpus=manifest["corpus"],
@@ -69,13 +103,16 @@ def complete_release(tmp_path, release_id):
         framework=manifest["framework"],
         document_count=manifest["document_count"],
         chunk_count=manifest["chunk_count"],
+        index=manifest["index"],
     )
 
-    return release_dir, manifest, observed
+    return release_dir, manifest, observed, chunks
 
 
 def test_complete_v1_validates(tmp_path):
-    release_dir, manifest, observed = complete_release(tmp_path, "synthetic-policy-v1")
+    release_dir, manifest, observed, _chunks = complete_release(
+        tmp_path, "synthetic-policy-v1"
+    )
 
     assert validate_release(release_dir, manifest, observed).release_id == (
         "synthetic-policy-v1"
@@ -83,7 +120,9 @@ def test_complete_v1_validates(tmp_path):
 
 
 def test_partial_v2_is_rejected_for_missing_file_hash_and_count(tmp_path):
-    release_dir, manifest, observed = complete_release(tmp_path, "synthetic-policy-v2")
+    release_dir, manifest, observed, _ = complete_release(
+        tmp_path, "synthetic-policy-v2"
+    )
 
     (release_dir / "corpus" / "second.md").unlink()
 
@@ -92,7 +131,9 @@ def test_partial_v2_is_rejected_for_missing_file_hash_and_count(tmp_path):
 
 
 def test_corpus_file_paths_must_be_relative_to_the_release(tmp_path):
-    release_dir, manifest, observed = complete_release(tmp_path, "synthetic-policy-v1")
+    release_dir, manifest, observed, _chunks = complete_release(
+        tmp_path, "synthetic-policy-v1"
+    )
 
     invalid_corpus = {
         **manifest["corpus"],
@@ -109,14 +150,18 @@ def test_corpus_file_paths_must_be_relative_to_the_release(tmp_path):
     "release_id", ["", ".", "..", "nested/release", r"nested\\release"]
 )
 def test_release_id_must_be_a_safe_namespace_component(tmp_path, release_id):
-    release_dir, manifest, observed = complete_release(tmp_path, "synthetic-policy-v1")
+    release_dir, manifest, observed, _chunks = complete_release(
+        tmp_path, "synthetic-policy-v1"
+    )
 
     with pytest.raises(ReleaseValidationError, match="release_id"):
         validate_release(release_dir, {**manifest, "release_id": release_id}, observed)
 
 
 def test_release_id_must_match_the_release_directory_name(tmp_path):
-    release_dir, manifest, observed = complete_release(tmp_path, "synthetic-policy-v1")
+    release_dir, manifest, observed, _chunks = complete_release(
+        tmp_path, "synthetic-policy-v1"
+    )
 
     renamed_release_dir = tmp_path / "different-release"
     release_dir.rename(renamed_release_dir)
@@ -133,7 +178,9 @@ def _symlink_or_skip(link, target, *, target_is_directory=False):
 
 
 def test_symlinked_corpus_root_is_rejected(tmp_path):
-    release_dir, manifest, observed = complete_release(tmp_path, "synthetic-policy-v1")
+    release_dir, manifest, observed, _chunks = complete_release(
+        tmp_path, "synthetic-policy-v1"
+    )
 
     external_corpus = tmp_path / "external-corpus"
     external_corpus.mkdir()
@@ -150,7 +197,9 @@ def test_symlinked_corpus_root_is_rejected(tmp_path):
 
 
 def test_symlinked_corpus_file_is_rejected(tmp_path):
-    release_dir, manifest, observed = complete_release(tmp_path, "synthetic-policy-v1")
+    release_dir, manifest, observed, _chunks = complete_release(
+        tmp_path, "synthetic-policy-v1"
+    )
 
     linked_file = release_dir / "corpus" / "first.md"
     external_file = tmp_path / "external.md"
@@ -191,7 +240,9 @@ def test_symlinked_corpus_file_is_rejected(tmp_path):
     ),
 )
 def test_manifest_metadata_requires_safe_types_and_values(tmp_path, field, value):
-    release_dir, manifest, observed = complete_release(tmp_path, "synthetic-policy-v1")
+    release_dir, manifest, observed, _chunks = complete_release(
+        tmp_path, "synthetic-policy-v1"
+    )
 
     if "." in field:
         section, nested_field = field.split(".")
@@ -228,7 +279,9 @@ def test_manifest_metadata_requires_safe_types_and_values(tmp_path, field, value
 def test_manifest_requires_every_nested_release_contract_field(
     tmp_path, section, field
 ):
-    release_dir, manifest, observed = complete_release(tmp_path, "synthetic-policy-v1")
+    release_dir, manifest, observed, _chunks = complete_release(
+        tmp_path, "synthetic-policy-v1"
+    )
 
     changed_section = {
         key: value for key, value in manifest[section].items() if key != field
@@ -242,7 +295,9 @@ def test_manifest_requires_every_nested_release_contract_field(
 
 @pytest.mark.parametrize("field", ["schema_version", "embedding"])
 def test_schema_or_embedding_mismatch_is_rejected(tmp_path, field):
-    release_dir, manifest, observed = complete_release(tmp_path, "synthetic-policy-v1")
+    release_dir, manifest, observed, _chunks = complete_release(
+        tmp_path, "synthetic-policy-v1"
+    )
 
     changed = (
         dataclasses.replace(observed, schema_version=observed.schema_version + 1)
@@ -258,7 +313,9 @@ def test_schema_or_embedding_mismatch_is_rejected(tmp_path, field):
 
 
 def test_failed_validation_never_changes_active_pointer(tmp_path):
-    release_dir, manifest, observed = complete_release(tmp_path, "synthetic-policy-v2")
+    release_dir, manifest, observed, _chunks = complete_release(
+        tmp_path, "synthetic-policy-v2"
+    )
     pointer = tmp_path / "active.json"
 
     pointer.write_text('{"release_id":"synthetic-policy-v1"}', encoding="utf-8")
@@ -277,7 +334,9 @@ def test_failed_validation_never_changes_active_pointer(tmp_path):
 
 
 def test_promotion_uses_one_atomic_replacement(tmp_path, monkeypatch):
-    release_dir, manifest, observed = complete_release(tmp_path, "synthetic-policy-v1")
+    release_dir, manifest, observed, _chunks = complete_release(
+        tmp_path, "synthetic-policy-v1"
+    )
 
     replacements = []
     monkeypatch.setattr(
@@ -335,3 +394,99 @@ def test_query_returns_every_chunk_from_the_captured_release_in_input_order(tmp_
         {"release_id": "v2", "id": "b"},
         {"release_id": "v2", "id": "c"},
     ]
+
+
+def test_missing_index_inventory_is_rejected(tmp_path):
+    """A release whose corpus files are complete but which stores no index
+    artifact at all must fail validation — the original gap this contract
+    closes: corpus completeness says nothing about index completeness."""
+    release_dir, manifest, observed, _chunks = complete_release(
+        tmp_path, "synthetic-policy-v1"
+    )
+    (release_dir / "index" / "chunk-inventory.json").unlink()
+
+    with pytest.raises(ReleaseValidationError, match="index"):
+        validate_release(release_dir, manifest, observed)
+
+
+def test_empty_index_inventory_is_rejected(tmp_path):
+    """An inventory claiming zero stored chunks cannot satisfy chunk_count."""
+    import hashlib as _hashlib
+
+    from rag_compare.release import canonical_inventory_bytes
+
+    release_dir, manifest, observed, _chunks = complete_release(
+        tmp_path, "synthetic-policy-v1"
+    )
+    payload = canonical_inventory_bytes([])
+    inventory = release_dir / "index" / "chunk-inventory.json"
+    inventory.write_bytes(payload)
+    digest = _hashlib.sha256(payload).hexdigest()
+
+    manifest = {
+        **manifest,
+        "index": {"chunk_inventory_sha256": digest, "chunk_count": 0},
+    }
+    observed = dataclasses.replace(observed, index=manifest["index"])
+
+    with pytest.raises(ReleaseValidationError):
+        validate_release(release_dir, manifest, observed)
+
+
+def test_stale_declared_chunk_ids_are_rejected(tmp_path):
+    """Inventory entries whose ids do not recompute from the on-disk corpus
+    under the identity contract must fail validation (stale-identity guard)."""
+    release_dir, manifest, observed, chunks = complete_release(
+        tmp_path, "synthetic-policy-v1"
+    )
+    from rag_compare.release import canonical_inventory_bytes
+
+    # Only the declared chunk ids are corrupted; hashes/spans stay consistent,
+    # so only the contract-derived id check can catch this.
+    tampered = [
+        {**dict(entry), "chunk_id": hashlib.sha256(str(i).encode()).hexdigest()}
+        for i, entry in enumerate(chunks)
+    ]
+    payload = canonical_inventory_bytes(tampered)
+    inventory = release_dir / "index" / "chunk-inventory.json"
+    inventory.parent.mkdir(parents=True, exist_ok=True)
+    inventory.write_bytes(payload)
+
+    manifest = {
+        **manifest,
+        "index": {
+            "chunk_inventory_sha256": hashlib.sha256(payload).hexdigest(),
+            "chunk_count": len(tampered),
+        },
+    }
+    observed = dataclasses.replace(observed, index=manifest["index"])
+
+    with pytest.raises(ReleaseValidationError, match="contract-derived"):
+        validate_release(release_dir, manifest, observed)
+
+
+def test_manifest_declared_ids_match_contract_recomputation():
+    """The shipped corpus manifests must declare the exact ids the live
+    contract computes — guards against stale declared metadata."""
+    from pathlib import Path
+
+    from rag_compare.adapters.base import load_corpus, make_normalized_chunk
+
+    project_root = Path(__file__).resolve().parents[1]
+    for version in ("v1", "v2"):
+        manifest_path = project_root / "corpus" / version / "manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        version_field = (
+            "source_version"
+            if manifest.get("schema_version") == 2
+            else "policy_version"
+        )
+        parsed_docs = {
+            doc.source_id: doc
+            for doc in load_corpus(project_root / "corpus" / version, manifest)
+        }
+        for entry in manifest["documents"]:
+            parsed = parsed_docs[entry["source_id"]]
+            chunk = make_normalized_chunk(parsed, version, version_field)
+            assert entry["document_id"] == chunk["document_id"], entry["source_id"]
+            assert entry["chunk_ids"] == [chunk["chunk_id"]], entry["source_id"]

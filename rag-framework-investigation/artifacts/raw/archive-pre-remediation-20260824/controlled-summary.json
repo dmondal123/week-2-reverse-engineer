@@ -1,0 +1,127 @@
+{
+  "cases": [
+    "multi_fact_wifi",
+    "exact_identifier_ap50",
+    "semantic_travel_connectivity",
+    "obsolete_source_trap",
+    "version_change_wifi_limit"
+  ],
+  "conditions": [
+    {
+      "artifact_dir": "artifacts/raw/task6-20260823T190633/haystack/bm25",
+      "build_manifest_sha256": "ad3cfa31e657b0883fa8829e646741610bfd3567f953f6a1cbff7c189fe797bb",
+      "case_count": 5,
+      "condition_id": "haystack:bm25",
+      "observed_metric_means": {
+        "citation_count": 5.0,
+        "citation_source_correctness": 0.28,
+        "citation_span_correctness": 1.0,
+        "forbidden_source_violation": 1.0,
+        "latency_capture_release_ms": 0.000467,
+        "latency_generate_ms": 1282.880775,
+        "latency_pack_ms": 0.0152,
+        "latency_release_filter_ms": 0.013691,
+        "latency_rerank_ms": 0.006117,
+        "latency_retrieve_ms": 10.6971,
+        "mrr": 0.866667,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "total_latency_ms": 1293.61335
+      }
+    },
+    {
+      "artifact_dir": "artifacts/raw/task6-20260823T190633/haystack/ollama_dense",
+      "build_manifest_sha256": "ad3cfa31e657b0883fa8829e646741610bfd3567f953f6a1cbff7c189fe797bb",
+      "case_count": 5,
+      "condition_id": "haystack:ollama_dense",
+      "observed_metric_means": {
+        "citation_count": 5.0,
+        "citation_source_correctness": 0.28,
+        "citation_span_correctness": 1.0,
+        "forbidden_source_violation": 1.0,
+        "latency_capture_release_ms": 0.000434,
+        "latency_generate_ms": 1217.8334,
+        "latency_pack_ms": 0.017133,
+        "latency_release_filter_ms": 0.0099,
+        "latency_rerank_ms": 0.005967,
+        "latency_retrieve_ms": 27.259575,
+        "mrr": 0.9,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "total_latency_ms": 1245.126409
+      }
+    },
+    {
+      "artifact_dir": "artifacts/raw/task6-20260823T190633/llamaindex/bm25",
+      "build_manifest_sha256": "9432f8016ee2c9d0234a5f625b07b8a8afa8c9580e0121dcc25d0e5b63b9d6d8",
+      "case_count": 5,
+      "condition_id": "llamaindex:bm25",
+      "observed_metric_means": {
+        "citation_count": 5.0,
+        "citation_source_correctness": 0.28,
+        "citation_span_correctness": 1.0,
+        "forbidden_source_violation": 1.0,
+        "latency_capture_release_ms": 0.000408,
+        "latency_generate_ms": 1575.074092,
+        "latency_pack_ms": 0.0175,
+        "latency_release_filter_ms": 0.012208,
+        "latency_rerank_ms": 0.007125,
+        "latency_retrieve_ms": 4.415333,
+        "mrr": 0.9,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "total_latency_ms": 1579.526667
+      }
+    },
+    {
+      "artifact_dir": "artifacts/raw/task6-20260823T190633/llamaindex/ollama_dense",
+      "build_manifest_sha256": "9432f8016ee2c9d0234a5f625b07b8a8afa8c9580e0121dcc25d0e5b63b9d6d8",
+      "case_count": 5,
+      "condition_id": "llamaindex:ollama_dense",
+      "observed_metric_means": {
+        "citation_count": 5.0,
+        "citation_source_correctness": 0.28,
+        "citation_span_correctness": 1.0,
+        "forbidden_source_violation": 1.0,
+        "latency_capture_release_ms": 0.000233,
+        "latency_generate_ms": 1271.413167,
+        "latency_pack_ms": 0.019217,
+        "latency_release_filter_ms": 0.015108,
+        "latency_rerank_ms": 0.006508,
+        "latency_retrieve_ms": 21.909125,
+        "mrr": 0.9,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "total_latency_ms": 1293.363358
+      }
+    }
+  ],
+  "control_validation": {
+    "compared_conditions": [
+      "haystack:bm25",
+      "haystack:ollama_dense",
+      "llamaindex:bm25",
+      "llamaindex:ollama_dense"
+    ],
+    "failures": [],
+    "passed": true
+  },
+  "created_at": "2026-08-23T19:07:01+00:00",
+  "input_hashes": {
+    "config/environment-manifest.json": "c96063a753b60b443c04a29c0f5e5a28d30e7df8af4ecd86970b0dadf9c62931",
+    "config/experiment.json": "a95c5d061e7ce78b53f185792146076d8f35af185d0b1162331998bc52726409",
+    "config/repository-manifest.json": "5c33a5e6722740f4acf44db6fc0777dc34142a01050ac83ee83e0eb8f08fdd03",
+    "corpus/v1/manifest.json": "1488c8aa64e348eef7c23530f1dd39df13db003ddcb74df08b296371287c068c",
+    "corpus/v2/manifest.json": "1ff5b77da6a4696d36c001d849f23833e8b64c1b08a2d1aa9febbee259b7b85b",
+    "eval/cases.json": "d4508a7edf96bcc20b04bbfb30a73b22f5cf1b17e980a8c409ab32570d23312b",
+    "generation.prompt_template": "cba6cea2ef5d905fbf513e35d90181f45f2235931b602ebe5b95e82469fb51d7"
+  },
+  "observation_kind": "observed",
+  "raw_artifacts_root": "artifacts/raw/task6-20260823T190633",
+  "results_csv": "artifacts/results/controlled-results.csv",
+  "results_json": "artifacts/results/controlled-summary.json",
+  "run_id": "task6-20260823T190633",
+  "run_manifest": "artifacts/raw/task6-20260823T190633/run-manifest.json",
+  "status": "passed",
+  "wall_clock_seconds": 27.885
+}

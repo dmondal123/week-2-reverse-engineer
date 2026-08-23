@@ -9,17 +9,20 @@ Metric definitions (deterministic):
 
 - ``recall_at_k``: |relevant ∩ top-k retrieved source_ids| / |relevant|
 - ``mrr``: 1/rank of the first relevant retrieved source_id, else 0.0
-- ``forbidden_source_violation``: 1.0 if any forbidden source_id appears in
-  the grounded context actually packed for generation (the emitted
-  citations), else 0.0. Per ``config/experiment.json`` retrieval.metadata_filter,
+- ``forbidden_source_violation``: 1.0 if any forbidden source_id appears
+  among the sources the ANSWER actually cited (model-derived citations),
+  else 0.0. Per ``config/experiment.json`` retrieval.metadata_filter,
   obsolete sources are intentionally indexed so the trap is answerable;
-  exclusion is enforced at citation scoring, not at retrieval.
+  a violation is citing one, not merely retrieving it.
 - ``citation_source_correctness``: correct citations / total citations,
   where a citation is correct iff its source_id is in the case's relevant
   set (0.0 when no citations were emitted)
 - ``citation_span_correctness``: citations whose [start, end] span exactly
   matches the indexed candidate span for the cited chunk_id / total
   citations (0.0 when no citations were emitted)
+- ``required_phrase_coverage``: fraction of the case's required_phrases
+  present in the generated answer (case-insensitive); measures whether the
+  answer itself carries the expected facts
 - ``stage_latencies_ms``: observed wall-clock duration per traced stage
 - ``total_latency_ms``: sum of per-stage durations
 - ``release_consistency``: 1.0 iff every candidate and citation carries the
@@ -94,6 +97,15 @@ def citation_span_correctness(
     return correct / len(citations)
 
 
+def required_phrase_coverage(required_phrases: Sequence[str], answer: str) -> float:
+    """Fraction of required phrases present in the answer, case-insensitively."""
+    if not required_phrases:
+        return 0.0
+    lowered = answer.lower()
+    hits = sum(1 for phrase in required_phrases if phrase.lower() in lowered)
+    return hits / len(required_phrases)
+
+
 def stage_latencies_ms(trace_events: Sequence[Mapping]) -> dict:
     """Observed duration in milliseconds keyed by stage name, in trace order."""
     latencies: dict[str, float] = {}
@@ -153,6 +165,9 @@ def evaluate_case(
         "citation_span_correctness": citation_span_correctness(candidates, citations),
         "release_consistency": release_consistency(
             result["active_release"], candidates, citations
+        ),
+        "required_phrase_coverage": required_phrase_coverage(
+            list(case.get("required_phrases", [])), str(result.get("answer", ""))
         ),
         "total_latency_ms": total_latency_ms(latencies),
     }
