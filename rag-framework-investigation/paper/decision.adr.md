@@ -36,6 +36,6 @@ We needed a production answer to two questions: (1) which RAG framework should o
 
 ## Next evidence worth buying
 
-1. Diagnose the citation_source_correctness ≈ 0.28 pattern (all four conditions) — currently an unexplained artifact behavior, not attributable to either framework.
+1. Diagnose the required-phrase-coverage gap (0.73–0.80 across conditions, per-case rows in `artifacts/results/controlled-results.csv`) — the generator sometimes omits an expected fact while citing correctly; the earlier citation_source_correctness ≈ 0.28 pattern was diagnosed as synthetic citations and remediated (EV-T8-002).
 2. Repeat runs (≥3) and more evaluation cases before any latency-based claims; generation latency dominates and is host-dependent.
 3. Test promotion/concurrent-query interleaving under real concurrency (atomicity was tested sequentially).

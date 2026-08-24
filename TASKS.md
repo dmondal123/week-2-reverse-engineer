@@ -519,7 +519,7 @@ Create: `paper/risk-control.md`
 
 Update: `week2/AI_COLLABORATION.md`
 
-- [x] **Step 1: Write the executive claim last, but place it first** *(draft: ~195-word claim in place; final wording awaits Human approval)*
+- [x] **Step 1: Write the executive claim last, but place it first** *(review 2026-08-24: claim measures 208 words — within 150–250; final wording awaits Human approval)*
 
 Keep it 150-250 words and state the production decision, most important finding, confidence, and consequence. Do not open with framework history.
 
@@ -539,7 +539,7 @@ Choose `adopt`, `adapt`, `combine`, `avoid`, or `investigate`; state alternative
 
 Record material prompts/instructions, tools/models, suggestions accepted or rejected, verification method, and residual uncertainty. Do not claim AI output as source or runtime evidence.
 
-- [x] **Step 6: Validate word count and evidence minimums** *(draft: body ≈3,071 words excl. appendix; 22 commit-bound refs, 2 runtime artifacts, failure result, 2 history refs, counterevidence, rejected explanation — draft-level check, subject to review)*
+- [x] **Step 6: Validate word count and evidence minimums** *(review 2026-08-24: PASSED after Human-approved extension — body measures 3,180 words excl. appendix (executive claim 208 words, within 150–250); evidence minimums met: 22 commit-bound refs, 2 runtime artifacts, failure result, 2 history refs, counterevidence, rejected explanation. All run-ID/latency/prompt-hash citations corrected to match `artifacts/results/*` and `config/experiment.json`)*
 
 The paper body must be 3,000-4,500 words excluding appendices. Check for at least 12 commit-bound references, two runtime artifacts, one failure result, two history/issue/ADR references, one counterexample, and one rejected explanation.
 

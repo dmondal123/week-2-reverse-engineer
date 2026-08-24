@@ -52,7 +52,7 @@ sequenceDiagram
 
     LI->>LI: filter_chunks_for_release(release_id) - raises MixedReleaseError on foreign chunk
     HI->>HI: filter_chunks_for_release(release_id) - same shared control
-    LI->>OL: generate (temperature 0, fixed prompt hash cba6cea2...)
+    LI->>OL: generate (temperature 0, fixed prompt hash e029718b...)
     HI->>OL: generate (same prompt, same budget 1200 tokens)
     OL-->>Q: answer + citations (source_id_and_chunk_id mode); every chunk carries provenance + release_id
     end
