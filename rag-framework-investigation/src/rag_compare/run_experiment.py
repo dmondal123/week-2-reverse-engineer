@@ -42,12 +42,11 @@ RETRIEVER_KINDS = ("bm25", "ollama_dense")
 
 # Manifest fields that are permitted to differ BETWEEN frameworks (not within
 # a framework pair). Everything else compared must match exactly.
+# Build manifests are kind-independent by construction: each framework builds
+# ONE index per corpus version and retrieval-kind differences (bm25 vs dense)
+# are query-time only, so pairwise comparisons must match exactly for every
+# non-framework field. Any difference beyond framework identity fails.
 FRAMEWORK_SCOPED_FIELDS = ("framework",)
-
-# Build-manifest fields treated as retriever-specific index data; they may
-# differ across retriever kinds but must match within one retriever kind
-# across frameworks.
-RETRIEVER_INDEX_FIELDS = ("index",)
 
 
 class JsonlTraceWriter:
@@ -148,11 +147,13 @@ def validate_controls(
 ) -> dict:
     """Programmatic control validation; returns a fail-closed report.
 
-    ``builds`` maps condition_id -> observed build manifest view. Allowed
-    material differences: framework-scoped fields across frameworks and
-    retriever-specific index data across retriever kinds. Any other
-    difference in corpus, parser/chunker configuration, embedding, reranker
-    posture, generator, prompt, cases, or active release fails validation.
+    ``builds`` maps condition_id -> observed build manifest view. Because each
+    framework builds one kind-independent index per corpus version, the same
+    manifest view is recorded for both retriever kinds of a build; allowed
+    material differences are therefore ONLY framework-scoped fields across
+    frameworks. Any other difference in corpus, parser/chunker configuration,
+    embedding, reranker posture, generator, prompt, cases, or active release
+    fails validation.
     """
     failures: list[str] = []
 
@@ -176,16 +177,11 @@ def validate_controls(
                 right_value = builds[right][field]
                 if left_value == right_value:
                     continue
-                framework_scoped = (
+                if (
                     field in FRAMEWORK_SCOPED_FIELDS
                     and left_framework != right_framework
-                )
-                if framework_scoped:
+                ):
                     continue  # framework identity legitimately differs
-                if (
-                    field in RETRIEVER_INDEX_FIELDS or field == "embedding"
-                ) and left_kind != right_kind:
-                    continue  # retriever-specific index data may differ
                 failures.append(
                     f"unapproved material difference between {left} and {right}: "
                     f"manifest field '{field}'"

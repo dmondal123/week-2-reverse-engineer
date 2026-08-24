@@ -24,6 +24,7 @@ from haystack.document_stores.types import DuplicatePolicy
 
 from rag_compare.adapters.base import (
     BaseAdapter,
+    BuildResult,
     ReleaseNamespaceError,
     make_candidate,
 )
@@ -67,7 +68,7 @@ class HaystackAdapter(BaseAdapter):
         corpus_path: str | Path,
         manifest: Mapping[str, object],
         trace,
-    ) -> dict:
+    ) -> BuildResult:
         release_id = str(manifest["corpus_version"])
 
         def embed_stage(chunks, rid):

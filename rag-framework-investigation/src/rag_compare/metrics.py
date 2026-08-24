@@ -65,7 +65,9 @@ def forbidden_source_violation(
     forbidden_source_ids: Sequence[str],
     citation_source_ids: Sequence[str],
 ) -> float:
-    """1.0 if a forbidden source reached the packed/grounded context, else 0.0."""
+    """1.0 if any forbidden source appears among the sources the ANSWER
+    actually cited (model-derived citations), else 0.0.
+    """
     forbidden = set(forbidden_source_ids)
     violated = set(citation_source_ids)
     return 1.0 if forbidden & violated else 0.0

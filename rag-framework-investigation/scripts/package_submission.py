@@ -68,9 +68,12 @@ ALLOWED_DIRS = [
     "corpus/v1/manifest.json",
     "corpus/v2/manifest.json",
     "artifacts/results",         # sanitized result summaries
-    "artifacts/raw/task6-20260823T202231",              # canonical controlled run (paper-cited)
-    "artifacts/raw/task6-20260823T203946",              # clean-shell reproduction run (Task 9 verification)
-    "artifacts/raw/archive-pre-remediation-20260824",   # preserved superseded evidence
+    # canonical controlled run (paper-cited)
+    "artifacts/raw/task6-20260823T202231",
+    # clean-shell reproduction run (Task 9 verification)
+    "artifacts/raw/task6-20260823T203946",
+    # preserved superseded evidence
+    "artifacts/raw/archive-pre-remediation-20260824",
 ]
 
 REQUIRED_MEMBERS = [
@@ -150,7 +153,12 @@ def build_zip() -> dict:
         for path in iter_allowlist():
             reason = check_allowed(path)
             if reason:
-                rejected.append({"path": path.relative_to(PROJECT_ROOT).as_posix(), "reason": reason})
+                rejected.append(
+                    {
+                        "path": path.relative_to(PROJECT_ROOT).as_posix(),
+                        "reason": reason,
+                    }
+                )
                 continue
             arcname = path.relative_to(PROJECT_ROOT).as_posix()
             zf.write(path, arcname)
@@ -193,7 +201,9 @@ def verify_zip() -> dict:
             for name in names:
                 target = (extract_root / name).resolve()
                 if not target.is_relative_to(extract_root.resolve()):
-                    failures.append(f"unsafe member path escapes extraction dir: {name}")
+                    failures.append(
+                        f"unsafe member path escapes extraction dir: {name}"
+                    )
                     continue
                 if target.suffix.lower() in DATA_SUFFIXES:
                     try:
@@ -211,15 +221,33 @@ def verify_zip() -> dict:
         "zip_sha256": sha256,
         "member_count": len(names),
         "checks": {
-            "testzip": "passed" if "testzip() reported a corrupt member" not in failures else "failed",
-            "required_members": "passed" if not any(f.startswith("required") for f in failures) else "failed",
-            "exclusion_scan": "passed" if not any(f.startswith("prohibited") for f in failures) else "failed",
-            "extraction_and_parse": "passed" if not any(f.startswith(("unparseable", "unsafe")) for f in failures) else "failed",
+            "testzip": (
+                "passed"
+                if "testzip() reported a corrupt member" not in failures
+                else "failed"
+            ),
+            "required_members": (
+                "passed"
+                if not any(f.startswith("required") for f in failures)
+                else "failed"
+            ),
+            "exclusion_scan": (
+                "passed"
+                if not any(f.startswith("prohibited") for f in failures)
+                else "failed"
+            ),
+            "extraction_and_parse": (
+                "passed"
+                if not any(f.startswith(("unparseable", "unsafe")) for f in failures)
+                else "failed"
+            ),
         },
         "failures": failures,
         "status": "passed" if not failures else "failed",
     }
-    VERIFICATION_PATH.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    VERIFICATION_PATH.write_text(
+        json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     return report
 
 
