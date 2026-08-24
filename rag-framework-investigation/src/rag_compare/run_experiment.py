@@ -31,6 +31,7 @@ from rag_compare.adapters.haystack_adapter import HaystackAdapter
 from rag_compare.adapters.llamaindex_adapter import LlamaIndexAdapter
 from rag_compare.contracts import StageEvent
 from rag_compare.metrics import evaluate_case
+from rag_compare.release import build_chunk_inventory
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
@@ -302,6 +303,23 @@ def main(argv: list[str] | None = None) -> int:
                     PROJECT_ROOT / "corpus" / version, manifest, trace
                 )
                 trace.close()
+                # Persist the full release manifest and its index inventory:
+                # the deliverable is "a full trace and release manifest", so
+                # the manifests cannot live only in memory with only hashes
+                # reaching the summary.
+                build_dir = raw_root / framework / f"release-{version}"
+                build_dir.mkdir(parents=True, exist_ok=True)
+                (build_dir / "release-manifest.json").write_text(
+                    json.dumps(result.manifest, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+                (build_dir / "chunk-inventory.json").write_text(
+                    json.dumps(
+                        build_chunk_inventory(result.chunks), indent=2, sort_keys=True
+                    )
+                    + "\n",
+                    encoding="utf-8",
+                )
                 for kind in RETRIEVER_KINDS:
                     builds[f"{framework}:{kind}"] = build_manifest_view(result)
 
