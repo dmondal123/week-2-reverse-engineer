@@ -174,8 +174,8 @@ def _validate_nested_manifest_fields(manifest: Mapping[str, object]) -> None:
     _require_nonempty_string(embedding["distance_metric"], "embedding.distance_metric")
 
     framework = manifest["framework"]
-    for field in ("commit", "package", "adapter"):
-        _require_nonempty_string(framework[field], f"framework.{field}")
+    for key in ("commit", "package", "adapter"):
+        _require_nonempty_string(framework[key], f"framework.{key}")
 
 
 def _release_file_path(value: object) -> str:
@@ -331,12 +331,12 @@ def validate_release(
 
     _validate_nested_manifest_fields(manifest)
 
-    for field in _OBSERVED_FIELDS:
-        actual = manifest[field]
-        expected = getattr(observed, field)
+    for observed_field in _OBSERVED_FIELDS:
+        actual = manifest[observed_field]
+        expected = getattr(observed, observed_field)
         if actual != expected:
             raise ReleaseValidationError(
-                f"manifest {field} does not match observed build"
+                f"manifest {observed_field} does not match observed build"
             )
 
     corpus_dir = _corpus_root(release_dir_path)
