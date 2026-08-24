@@ -43,11 +43,6 @@ import pytest
 from rag_compare.adapters.base import STAGE_ORDER
 from rag_compare.adapters.haystack_adapter import HaystackAdapter
 from rag_compare.adapters.llamaindex_adapter import LlamaIndexAdapter
-
-FRAMEWORK_COMMITS = {
-    "haystack": ("c7cb46c0f28ad1984f60e5d3e9404b124a221437", "haystack"),
-    "llamaindex": ("d8021225eb7e7b276d5ceb476b0a4650240f27f8", "llama_index"),
-}
 from rag_compare.contracts import StageEvent
 from rag_compare.metrics import evaluate_case
 from rag_compare.release import (
@@ -58,6 +53,11 @@ from rag_compare.release import (
     promote_release,
     write_index_inventory,
 )
+
+FRAMEWORK_COMMITS = {
+    "haystack": ("c7cb46c0f28ad1984f60e5d3e9404b124a221437", "haystack"),
+    "llamaindex": ("d8021225eb7e7b276d5ceb476b0a4650240f27f8", "llama_index"),
+}
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
@@ -162,7 +162,10 @@ def copy_corpus_files(
 def make_adapter(config: dict, framework: str):
     """Build the adapter for one framework; the scenario is framework-generic."""
     commit, package = FRAMEWORK_COMMITS[framework]
-    adapter_cls = {"haystack": HaystackAdapter, "llamaindex": LlamaIndexAdapter}[framework]
+    adapter_cls = {
+        "haystack": HaystackAdapter,
+        "llamaindex": LlamaIndexAdapter,
+    }[framework]
     return adapter_cls(
         config,
         framework_commit=commit,
@@ -559,11 +562,11 @@ def finalize_evidence(evidence: dict) -> None:
         except (UnicodeDecodeError, json.JSONDecodeError):
             pass  # legacy single-framework artifact; replaced below
     combined[framework] = {
-        key: value
-        for key, value in evidence.items()
-        if not key.startswith("_")
+        key: value for key, value in evidence.items() if not key.startswith("_")
     }
-    combined_path.write_text(json.dumps(combined, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    combined_path.write_text(
+        json.dumps(combined, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     evidence["_summary_path"] = str(combined_path)
 
 
