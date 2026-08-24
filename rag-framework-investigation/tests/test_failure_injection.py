@@ -42,6 +42,12 @@ import pytest
 
 from rag_compare.adapters.base import STAGE_ORDER
 from rag_compare.adapters.haystack_adapter import HaystackAdapter
+from rag_compare.adapters.llamaindex_adapter import LlamaIndexAdapter
+
+FRAMEWORK_COMMITS = {
+    "haystack": ("c7cb46c0f28ad1984f60e5d3e9404b124a221437", "haystack"),
+    "llamaindex": ("d8021225eb7e7b276d5ceb476b0a4650240f27f8", "llama_index"),
+}
 from rag_compare.contracts import StageEvent
 from rag_compare.metrics import evaluate_case
 from rag_compare.release import (
@@ -153,11 +159,14 @@ def copy_corpus_files(
     return entries
 
 
-def make_adapter(config: dict) -> HaystackAdapter:
-    return HaystackAdapter(
+def make_adapter(config: dict, framework: str):
+    """Build the adapter for one framework; the scenario is framework-generic."""
+    commit, package = FRAMEWORK_COMMITS[framework]
+    adapter_cls = {"haystack": HaystackAdapter, "llamaindex": LlamaIndexAdapter}[framework]
+    return adapter_cls(
         config,
-        framework_commit="c7cb46c0f28ad1984f60e5d3e9404b124a221437",
-        framework_package="haystack",
+        framework_commit=commit,
+        framework_package=package,
         run_id=f"failure-injection-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}",
     )
 
@@ -398,25 +407,29 @@ def recover_and_promote_v2(
 # ---- Session scenario -------------------------------------------------------
 
 
-@pytest.fixture(scope="module")
-def scenario(tmp_path_factory):
+@pytest.fixture(scope="module", params=["llamaindex", "haystack"])
+def scenario(tmp_path_factory, request):
+    framework = request.param
     tmp_path = tmp_path_factory.mktemp("failure-injection")
     config = load_json("config/experiment.json")
 
     # Preconditions: Ollama availability is required before any runtime call.
-    adapter = make_adapter(config)
+    adapter = make_adapter(config, framework)
     evidence: dict = {
         "run_id": adapter.run_id,
         "started_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "ollama_version": adapter.client.version(),
-        "framework": "haystack",
+        "framework": framework,
         "commands": ["pytest tests/test_failure_injection.py -v"],
         "expected_behavior": EXPECTED_BEHAVIOR,
         "assertions": {},
     }
-    trace_a = TraceWriter(PROJECT_ROOT / "artifacts/raw/failure-injection-trace.jsonl")
+    trace_a = TraceWriter(
+        PROJECT_ROOT / f"artifacts/raw/failure-injection-{framework}-trace.jsonl"
+    )
     trace_b = TraceWriter(
-        PROJECT_ROOT / "artifacts/raw/failure-injection-post-recovery-trace.jsonl"
+        PROJECT_ROOT
+        / f"artifacts/raw/failure-injection-{framework}-post-recovery-trace.jsonl"
     )
 
     try:
@@ -514,21 +527,44 @@ def merge_evidence(evidence: dict, phase: dict) -> None:
 
 
 def finalize_evidence(evidence: dict) -> None:
-    """Stamp completion metadata and persist the sanitized result summary."""
+    """Stamp completion metadata and persist the sanitized result summaries.
+
+    One per-framework result file plus a combined ``failure-injection.json``
+    holding both frameworks under their names (pytest executes the parametrized
+    scenarios sequentially in one process, so read-modify-write is safe).
+    """
+    framework = evidence["framework"]
     evidence["completed_at"] = datetime.now(UTC).isoformat(timespec="seconds")
     evidence["artifact_paths"] = {
-        "first_failure_trace": "artifacts/raw/failure-injection-trace.jsonl",
-        "post_recovery_trace": (
-            "artifacts/raw/failure-injection-post-recovery-trace.jsonl"
+        "first_failure_trace": (
+            f"artifacts/raw/failure-injection-{framework}-trace.jsonl"
         ),
-        "result_summary": "artifacts/results/failure-injection.json",
+        "post_recovery_trace": (
+            f"artifacts/raw/failure-injection-{framework}-post-recovery-trace.jsonl"
+        ),
+        "result_summary": f"artifacts/results/failure-injection-{framework}.json",
     }
-    summary_path = PROJECT_ROOT / "artifacts/results/failure-injection.json"
-    summary_path.parent.mkdir(parents=True, exist_ok=True)
-    summary_path.write_text(
+    results_dir = PROJECT_ROOT / "artifacts/results"
+    results_dir.mkdir(parents=True, exist_ok=True)
+    (results_dir / f"failure-injection-{framework}.json").write_text(
         json.dumps(evidence, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    evidence["_summary_path"] = str(summary_path)
+    combined_path = results_dir / "failure-injection.json"
+    combined = {}
+    if combined_path.exists():
+        try:
+            loaded = json.loads(combined_path.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict) and set(loaded) <= {"llamaindex", "haystack"}:
+                combined = loaded
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            pass  # legacy single-framework artifact; replaced below
+    combined[framework] = {
+        key: value
+        for key, value in evidence.items()
+        if not key.startswith("_")
+    }
+    combined_path.write_text(json.dumps(combined, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    evidence["_summary_path"] = str(combined_path)
 
 
 # ---- Acceptance assertions --------------------------------------------------
