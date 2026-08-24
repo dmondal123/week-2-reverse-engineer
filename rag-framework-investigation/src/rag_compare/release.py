@@ -7,7 +7,7 @@ import json
 import os
 import tempfile
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 
 from rag_compare import identity
@@ -39,6 +39,7 @@ class BuildArtifacts:
     document_count: int
     chunk_count: int
     index: dict
+    query_contract: dict = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -58,6 +59,7 @@ _OBSERVED_FIELDS = (
     "document_count",
     "chunk_count",
     "index",
+    "query_contract",
 )
 
 _REQUIRED_FIELDS = (
@@ -74,6 +76,19 @@ _REQUIRED_NESTED_FIELDS = {
     "embedding": ("name", "ollama_digest", "dimensions", "distance_metric"),
     "framework": ("commit", "package", "adapter"),
     "index": ("chunk_inventory_sha256", "chunk_count"),
+    # Query-time dependencies participate in the release definition: changing
+    # the retriever, reranker, packing, generator, prompt, or sampling
+    # parameters changes the manifest hash and therefore requires a new
+    # release for reproducible answers.
+    "query_contract": (
+        "retrieval",
+        "reranking",
+        "context",
+        "generation_model",
+        "generation_ollama_id",
+        "prompt_sha256",
+        "generation_options",
+    ),
 }
 
 _LOWER_HEX = frozenset("0123456789abcdef")

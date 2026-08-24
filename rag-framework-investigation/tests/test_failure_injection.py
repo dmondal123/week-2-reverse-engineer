@@ -294,6 +294,17 @@ def inject_partial_v2(
             ],
             "chunk_count": len(v2_manifest["documents"]),
         },
+        "query_contract": {
+            "retrieval": {"conditions": ["bm25"], "top_k": 5,
+                          "score_order": "descending",
+                          "tie_break_rule": "score_desc_then_chunk_id_asc"},
+            "reranking": {"enabled": False, "method": "none"},
+            "context": {"budget_tokens": 1200},
+            "generation_model": "test-gen",
+            "generation_ollama_id": "deadbeef",
+            "prompt_sha256": "p" * 64,
+            "generation_options": {"temperature": 0},
+        },
     }
     claimed_observed = BuildArtifacts(
         corpus=claimed_manifest["corpus"],

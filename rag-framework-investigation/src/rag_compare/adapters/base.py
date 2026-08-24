@@ -514,6 +514,28 @@ class BaseAdapter(ABC):
             "chunk_inventory_sha256": inventory_sha256,
             "chunk_count": len(inventory_entries),
         }
+        # Query-time dependencies are part of the release definition: the
+        # retriever, reranker, packing, generator, prompt, and sampling
+        # parameters must version together with the index for answers to be
+        # reproducible.
+        generation = self.config["generation"]  # type: ignore[index]
+        retrieval = self.config["retrieval"]  # type: ignore[index]
+        manifest["query_contract"] = {
+            "retrieval": {
+                "conditions": list(retrieval["retriever_conditions"]),
+                "top_k": self.top_k,
+                "score_order": retrieval["score_order"],
+                "tie_break_rule": retrieval["tie_break_rule"],
+            },
+            "reranking": dict(self.config["reranking"]),  # type: ignore[index]
+            "context": dict(self.config["context"]),  # type: ignore[index]
+            "generation_model": self.generation_model,
+            "generation_ollama_id": self.config["models"]["generation_ollama_id"],  # type: ignore[index]
+            "prompt_sha256": identity.sha256_bytes(
+                str(generation["prompt_template"]).encode("utf-8")
+            ),
+            "generation_options": self.generation_options,
+        }
         observed = BuildArtifacts(
             corpus={
                 "version": manifest["corpus"]["version"],
@@ -527,6 +549,7 @@ class BaseAdapter(ABC):
             document_count=manifest["document_count"],
             chunk_count=manifest["chunk_count"],
             index=manifest["index"],
+            query_contract=manifest["query_contract"],
         )
         return BuildResult(manifest=manifest, observed=observed, chunks=chunks)
 

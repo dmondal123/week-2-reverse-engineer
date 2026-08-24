@@ -73,6 +73,18 @@ def complete_release(tmp_path, release_id):
         "chunk_count": 2,
         # A placeholder digest is replaced with the real inventory below.
         "index": {"chunk_inventory_sha256": "0" * 64, "chunk_count": 2},
+        "query_contract": {
+            "retrieval": {"conditions": ["bm25"], "top_k": 5,
+                          "score_order": "descending",
+                          "tie_break_rule": "score_desc_then_chunk_id_asc"},
+            "reranking": {"enabled": False, "method": "none"},
+            "context": {"budget_tokens": 1200},
+            "generation_model": "test-gen",
+            "generation_ollama_id": "deadbeef",
+            "prompt_sha256": "p" * 64,
+            "generation_options": {"temperature": 0},
+        },
+
         "built_at": "2026-08-22T00:00:00Z",
         "validation_status": "passed",
     }
@@ -105,6 +117,7 @@ def complete_release(tmp_path, release_id):
         document_count=manifest["document_count"],
         chunk_count=manifest["chunk_count"],
         index=manifest["index"],
+        query_contract=manifest["query_contract"],
     )
 
     return release_dir, manifest, observed, chunks
@@ -506,3 +519,25 @@ def test_manifest_declared_ids_match_contract_recomputation():
             assert entry["chunk_ids"] == [c["chunk_id"] for c in chunks], (
                 entry["source_id"]
             )
+
+
+def test_missing_query_contract_is_rejected(tmp_path):
+    """Query-time dependencies are part of the release definition."""
+    import copy
+
+    release_dir, manifest, observed, _ = complete_release(tmp_path, "synthetic-v1")
+    broken = copy.deepcopy(manifest)
+    del broken["query_contract"]
+    with pytest.raises(ReleaseValidationError):
+        validate_release(release_dir, broken, observed)
+
+
+def test_stale_query_contract_is_rejected(tmp_path):
+    """Changing the prompt/generator without a new release must fail validation."""
+    import copy
+
+    release_dir, manifest, observed, _ = complete_release(tmp_path, "synthetic-v1")
+    broken = copy.deepcopy(manifest)
+    broken["query_contract"]["prompt_sha256"] = "f" * 64
+    with pytest.raises(ReleaseValidationError):
+        validate_release(release_dir, broken, observed)
