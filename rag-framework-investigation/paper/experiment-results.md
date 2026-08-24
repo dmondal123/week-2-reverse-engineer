@@ -6,16 +6,16 @@ Generated mechanically from `artifacts/results/controlled-summary.json`, `artifa
 
 ## A. Controlled 2×2 experiment — per-condition means (5 cases each)
 
-Run ID: `task6-20260824T052921` (wall clock 26.614 s, status `passed` — control validation AND quality gates).
+Run ID: `task6-20260824T064738` (wall clock 26.787 s, status `passed` — control validation AND quality gates). Fresh rerun after the release-inventory layout fix; pre-rerun artifacts archived at `artifacts/raw/archive-prerun-20260824-fresh/`. All quality metrics reproduced exactly from the prior run (`task6-20260824T052921`); only host-dependent latencies shifted marginally.
 
 | Condition | recall@k | MRR | citation span correctness (byte-verified) | citation source correctness | citation support | required-phrase coverage | mean citations/case | release consistency | retrieve ms | generate ms | total ms |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| llamaindex:bm25 | 1.0 | 0.90 | 1.00 | 1.00 | 0.73 | 0.80 | 1.0 | 1.0 | 4.7 | 1232.2 | 1237.0 |
-| llamaindex:ollama_dense | 1.0 | 0.90 | 1.00 | 1.00 | 0.73 | 0.80 | 1.2 | 1.0 | 21.2 | 1458.9 | 1480.1 |
-| haystack:bm25 | 1.0 | 0.87 | 1.00 | 1.00 | 0.73 | 0.73 | 1.0 | 1.0 | 9.7 | 1164.0 | 1173.7 |
-| haystack:ollama_dense | 1.0 | 0.90 | 1.00 | 1.00 | 0.73 | 0.80 | 1.2 | 1.0 | 25.2 | 1295.2 | 1320.5 |
+| llamaindex:bm25 | 1.0 | 0.90 | 1.00 | 1.00 | 0.73 | 0.80 | 1.0 | 1.0 | 3.3 | 1236.9 | 1240.3 |
+| llamaindex:ollama_dense | 1.0 | 0.90 | 1.00 | 1.00 | 0.73 | 0.80 | 1.2 | 1.0 | 22.9 | 1468.5 | 1491.5 |
+| haystack:bm25 | 1.0 | 0.87 | 1.00 | 1.00 | 0.73 | 0.73 | 1.0 | 1.0 | 11.4 | 1175.8 | 1187.3 |
+| haystack:ollama_dense | 1.0 | 0.90 | 1.00 | 1.00 | 0.73 | 0.80 | 1.2 | 1.0 | 27.2 | 1304.0 | 1331.3 |
 
-Full release manifests and chunk inventories are persisted at `artifacts/raw/task6-20260824T052921/<framework>/release-{v1,v2}/`.
+Full release manifests and chunk inventories are persisted at `artifacts/raw/task6-20260824T064738/<framework>/release-{v1,v2}/index/`.
 
 Build-manifest SHA-256 is identical within each framework pair, so only `retriever_kind` and retriever-specific index data differ (`control_validation.failures = []`). Quality gates (frozen in `config/experiment.json` before the rerun): recall@k ≥ 0.5 per case, zero forbidden-source violations, release consistency 1.0 everywhere — all met.
 
@@ -45,7 +45,7 @@ The identical partial-v2 promotion scenario was executed through each framework'
 | Phase B queries after promotion | only v2 chunks | all returned_release_ids = ["v2"] | ✅ |
 | Deleted v1 content (office-snacks) | never returned under v2 | absent from all Phase B contexts | ✅ |
 
-All 9 recorded assertions true; traces preserved at `artifacts/raw/failure-injection-trace.jsonl` and `artifacts/raw/failure-injection-post-recovery-trace.jsonl`.
+All 18 recorded assertions true — 9 per framework (runs `failure-injection-20260824T052837` llamaindex / `20260824T052850` haystack); traces preserved at `artifacts/raw/failure-injection-{llamaindex,haystack}-trace.jsonl` and `artifacts/raw/failure-injection-{llamaindex,haystack}-post-recovery-trace.jsonl`.
 
 **New since remediation:** promotion now additionally validates a stored index artifact (`index/chunk-inventory.json`, hash-bound in the build manifest). Unit-level negative tests prove a release whose corpus files are complete but which stores **no inventory**, an **empty inventory**, or a **stale-ID inventory** cannot be validated (`tests/test_release.py`) — closing the original gap where validation proved corpus completeness but not index completeness. The partial-promotion rejection itself is still triggered first by the file-set check because the injected scenario stages exactly what it indexed; the decoupled failure modes are covered by the new unit tests.
 

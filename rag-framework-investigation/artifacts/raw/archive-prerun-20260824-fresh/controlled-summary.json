@@ -1,0 +1,143 @@
+{
+  "cases": [
+    "multi_fact_wifi",
+    "exact_identifier_ap50",
+    "semantic_travel_connectivity",
+    "obsolete_source_trap",
+    "version_change_wifi_limit"
+  ],
+  "conditions": [
+    {
+      "artifact_dir": "artifacts/raw/task6-20260824T052921/haystack/bm25",
+      "build_manifest_sha256": "b087ab8eff190f0d14565a265a0d958c812a5f6c20d2810e6801b6f01f94af4b",
+      "case_count": 5,
+      "condition_id": "haystack:bm25",
+      "observed_metric_means": {
+        "citation_count": 1.0,
+        "citation_source_correctness": 1.0,
+        "citation_span_correctness": 1.0,
+        "citation_support": 0.733333,
+        "forbidden_source_violation": 0.0,
+        "latency_capture_release_ms": 0.000383,
+        "latency_citation_ms": 0.017217,
+        "latency_generate_ms": 1163.973408,
+        "latency_pack_ms": 0.012159,
+        "latency_release_filter_ms": 0.007542,
+        "latency_rerank_ms": 0.0044,
+        "latency_retrieve_ms": 9.697583,
+        "mrr": 0.866667,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "required_phrase_coverage": 0.733333,
+        "total_latency_ms": 1173.712692
+      }
+    },
+    {
+      "artifact_dir": "artifacts/raw/task6-20260824T052921/haystack/ollama_dense",
+      "build_manifest_sha256": "b087ab8eff190f0d14565a265a0d958c812a5f6c20d2810e6801b6f01f94af4b",
+      "case_count": 5,
+      "condition_id": "haystack:ollama_dense",
+      "observed_metric_means": {
+        "citation_count": 1.2,
+        "citation_source_correctness": 1.0,
+        "citation_span_correctness": 1.0,
+        "citation_support": 0.733333,
+        "forbidden_source_violation": 0.0,
+        "latency_capture_release_ms": 0.000375,
+        "latency_citation_ms": 0.02535,
+        "latency_generate_ms": 1295.215666,
+        "latency_pack_ms": 0.016833,
+        "latency_release_filter_ms": 0.008975,
+        "latency_rerank_ms": 0.005466,
+        "latency_retrieve_ms": 25.191183,
+        "mrr": 0.9,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "required_phrase_coverage": 0.8,
+        "total_latency_ms": 1320.463849
+      }
+    },
+    {
+      "artifact_dir": "artifacts/raw/task6-20260824T052921/llamaindex/bm25",
+      "build_manifest_sha256": "26df1d81c19a131666c78bbe495f81d88d0947f4895d418c5cc4715d1653ab9e",
+      "case_count": 5,
+      "condition_id": "llamaindex:bm25",
+      "observed_metric_means": {
+        "citation_count": 1.0,
+        "citation_source_correctness": 1.0,
+        "citation_span_correctness": 1.0,
+        "citation_support": 0.733333,
+        "forbidden_source_violation": 0.0,
+        "latency_capture_release_ms": 0.0005,
+        "latency_citation_ms": 0.103025,
+        "latency_generate_ms": 1232.216741,
+        "latency_pack_ms": 0.010342,
+        "latency_release_filter_ms": 0.007425,
+        "latency_rerank_ms": 0.005309,
+        "latency_retrieve_ms": 4.664459,
+        "mrr": 0.9,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "required_phrase_coverage": 0.8,
+        "total_latency_ms": 1237.0078
+      }
+    },
+    {
+      "artifact_dir": "artifacts/raw/task6-20260824T052921/llamaindex/ollama_dense",
+      "build_manifest_sha256": "26df1d81c19a131666c78bbe495f81d88d0947f4895d418c5cc4715d1653ab9e",
+      "case_count": 5,
+      "condition_id": "llamaindex:ollama_dense",
+      "observed_metric_means": {
+        "citation_count": 1.2,
+        "citation_source_correctness": 1.0,
+        "citation_span_correctness": 1.0,
+        "citation_support": 0.733333,
+        "forbidden_source_violation": 0.0,
+        "latency_capture_release_ms": 0.000258,
+        "latency_citation_ms": 0.024525,
+        "latency_generate_ms": 1458.909333,
+        "latency_pack_ms": 0.017875,
+        "latency_release_filter_ms": 0.011392,
+        "latency_rerank_ms": 0.005592,
+        "latency_retrieve_ms": 21.166459,
+        "mrr": 0.9,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "required_phrase_coverage": 0.8,
+        "total_latency_ms": 1480.135434
+      }
+    }
+  ],
+  "control_validation": {
+    "compared_conditions": [
+      "haystack:bm25",
+      "haystack:ollama_dense",
+      "llamaindex:bm25",
+      "llamaindex:ollama_dense"
+    ],
+    "failures": [],
+    "passed": true
+  },
+  "created_at": "2026-08-24T05:29:48+00:00",
+  "input_hashes": {
+    "config/environment-manifest.json": "c96063a753b60b443c04a29c0f5e5a28d30e7df8af4ecd86970b0dadf9c62931",
+    "config/experiment.json": "6adaa5061ab169eb6742801a6007c8adae7713eb524db824117bac294ba6d4d2",
+    "config/repository-manifest.json": "5c33a5e6722740f4acf44db6fc0777dc34142a01050ac83ee83e0eb8f08fdd03",
+    "corpus/v1/manifest.json": "cafc13286c49bea83fcc1d56543f81e3953a656d4d99213a00d7c1931f9c6d60",
+    "corpus/v2/manifest.json": "78ec72b3bf888db87b04c769c227fc882dbd88897258bae6a549d3b2bb94b899",
+    "eval/cases.json": "d4508a7edf96bcc20b04bbfb30a73b22f5cf1b17e980a8c409ab32570d23312b",
+    "generation.prompt_template": "90a5f094e67e54e3732ce04edc43b320c74188c976d7c720524ddf7a074fed7d"
+  },
+  "observation_kind": "observed",
+  "quality_gates": {
+    "failures": [],
+    "passed": true
+  },
+  "raw_artifacts_root": "artifacts/raw/task6-20260824T052921",
+  "results_csv": "artifacts/results/controlled-results.csv",
+  "results_json": "artifacts/results/controlled-summary.json",
+  "run_id": "task6-20260824T052921",
+  "run_manifest": "artifacts/raw/task6-20260824T052921/run-manifest.json",
+  "status": "passed",
+  "wall_clock_seconds": 26.614
+}

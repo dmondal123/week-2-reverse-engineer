@@ -12,9 +12,9 @@ sequenceDiagram
     participant Q as Query caller
 
     rect rgb(235, 245, 255)
-    Note over C,R: Index-time — staging namespace created, index built, THEN validated at promotion
+    Note over C,R: Index-time — parse → split → identify → embed → index → write inventory/manifest → validate at promotion
     C->>R: corpus files + manifest.json (source_id, hashes)
-    R->>R: stage_release: copy corpus into immutable staging namespace; write chunk inventory + release manifest
+    R->>R: stage_release: copy corpus into immutable staging namespace (inventory/manifest NOT yet written)
     SHARED->>SHARED: parse + real cl100k_base token-window split (200/40) + identity contract (src/rag_compare/adapters/base.py, tests/test_chunking.py)
 
     alt LlamaIndex index path
@@ -26,8 +26,8 @@ sequenceDiagram
         HI->>HI: chunks indexed verbatim as Documents (id/text/embedding/meta from contract); no framework-native splitting (HS-1/HS-2 DuplicatePolicy.FAIL)
     end
 
-    R->>R: validate_release: file set, SHA-256 hashes, counts, schema, embedding identity, QUERY CONTRACT (retriever/rerank/packing/generator/prompt/options) + stored chunk inventory recomputed from corpus bytes (release.py)
-    R->>R: promote_release: validate staging == manifest, then ONE atomic os.replace of active pointer
+    R->>R: AFTER indexing: write chunk inventory + release manifest with canonical bytes (run_experiment.py; inventory hash-bound in manifest index block)
+    R->>R: validate_release FIRST (see above), then promote_release: validate staging == manifest, then ONE atomic os.replace of active pointer
     R-->>R: failed validation never touches active.json (Task 7 rev: partial v2 rejected on BOTH adapters, pointer stayed {"release_id": "v1"})
     end
 

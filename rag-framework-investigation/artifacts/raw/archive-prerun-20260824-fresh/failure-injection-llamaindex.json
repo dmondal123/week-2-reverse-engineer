@@ -1,0 +1,513 @@
+{
+  "active_release_captured_phase_a": "v1",
+  "active_release_captured_phase_b": "v2",
+  "artifact_paths": {
+    "first_failure_trace": "artifacts/raw/failure-injection-llamaindex-trace.jsonl",
+    "post_recovery_trace": "artifacts/raw/failure-injection-llamaindex-post-recovery-trace.jsonl",
+    "result_summary": "artifacts/results/failure-injection-llamaindex.json"
+  },
+  "assertions": {
+    "complete_v2_validated_and_promoted": true,
+    "deleted_v1_content_not_returned": true,
+    "mixed_release_filter_raises": true,
+    "office_snacks_absent_after_v2": true,
+    "partial_promotion_rejected": true,
+    "phase_a_all_results_v1": true,
+    "phase_a_no_v2_chunk_returned": true,
+    "phase_b_all_results_v2": true,
+    "pointer_unchanged_after_failure": true
+  },
+  "commands": [
+    "pytest tests/test_failure_injection.py -v"
+  ],
+  "completed_at": "2026-08-24T06:46:54+00:00",
+  "expected_behavior": {
+    "complete_v2_validated_and_promoted": "the completed v2 release passes validation and promotion succeeds",
+    "deleted_v1_content_not_returned": "with the v1 namespace removed, deleted v1 content cannot be returned",
+    "mixed_release_filter_raises": "filter_chunks_for_release must raise MixedReleaseError when a branch carries a chunk from another release",
+    "office_snacks_absent_after_v2": "office-snacks exists only in v1 and must never be served under v2",
+    "partial_promotion_rejected": "promoting a staging release whose directory holds only half of v2 while its manifest claims all five documents must raise ReleaseValidationError",
+    "phase_a_all_results_v1": "every evaluation case queried against the captured active release must return only v1 chunks on both retrieval branches",
+    "phase_a_no_v2_chunk_returned": "no chunk from the incomplete v2 build may reach any Phase A query",
+    "phase_b_all_results_v2": "after atomic promotion every queried chunk belongs to v2 only",
+    "pointer_unchanged_after_failure": "a failed validation must leave the active pointer byte-identical (still {\"release_id\": \"v1\"})"
+  },
+  "framework": "llamaindex",
+  "manifest_sha256": {
+    "config/experiment.json": "6adaa5061ab169eb6742801a6007c8adae7713eb524db824117bac294ba6d4d2",
+    "corpus/v1/manifest.json": "cafc13286c49bea83fcc1d56543f81e3953a656d4d99213a00d7c1931f9c6d60",
+    "corpus/v2/manifest.json": "78ec72b3bf888db87b04c769c227fc882dbd88897258bae6a549d3b2bb94b899",
+    "eval/cases.json": "d4508a7edf96bcc20b04bbfb30a73b22f5cf1b17e980a8c409ab32570d23312b"
+  },
+  "ollama_version": "0.32.13",
+  "partial_promotion_error": "manifest query_contract does not match observed build",
+  "phase_a_queries": [
+    {
+      "answer_excerpt": "Contractors do not use the employee reimbursement program and may only bill a business expense if the signed statement of work explicitly marks that expense as reimbursable; otherwise, the contractor ",
+      "captured_release": "v1",
+      "case_id": "multi_fact_wifi",
+      "chunk_ids": [
+        "cc7a0b48135312c48e4e2fed8021f952969895659c800dc8f9aa728c5d3c0886",
+        "0338d25f38f54bdaa5e5a534dc8d8df4e641697bf19796076a08e73bc833038b",
+        "98e6f611f08475cd3275aa624f63accde585ce964e57fc37f3ee953b20c88f40",
+        "e04e2793bd19f39d12945f2adf1905a7d9a8120403dda4088d1e8301a9c39f47",
+        "117c37f8b576e971468cbe8c6e8c77a476d76fb6610fd7ffa33476efc7f4fecc"
+      ],
+      "metrics": {
+        "candidate_count": 5,
+        "citation_count": 2,
+        "citation_source_correctness": 1.0,
+        "citation_span_correctness": 1.0,
+        "citation_support": 0.0,
+        "forbidden_source_violation": 0.0,
+        "latency_capture_release_ms": 0.000125,
+        "latency_citation_ms": 0.025167,
+        "latency_embed_ms": 96.697125,
+        "latency_generate_ms": 2669.621125,
+        "latency_identity_ms": 0.007208,
+        "latency_pack_ms": 0.009666,
+        "latency_parse_ms": 0.132417,
+        "latency_release_filter_ms": 0.006041,
+        "latency_rerank_ms": 0.003,
+        "latency_retrieve_ms": 28.114,
+        "latency_split_ms": 0.151375,
+        "latency_store_ms": 2.441291,
+        "mrr": 1.0,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "required_phrase_coverage": 1.0,
+        "total_latency_ms": 2797.20854
+      },
+      "no_mixed_release": true,
+      "retriever_kind": "ollama_dense",
+      "returned_release_ids": [
+        "v1"
+      ],
+      "source_ids": [
+        "travel-wifi-current",
+        "finance-memo-obsolete",
+        "device-security",
+        "contractor-scope",
+        "approval-matrix"
+      ]
+    },
+    {
+      "answer_excerpt": "Rule ID AP-50 requires that any single reimbursement claim above $50 must have manager approval before submission. Claims of $50 or less follow the standard receipt review. [1]",
+      "captured_release": "v1",
+      "case_id": "exact_identifier_ap50",
+      "chunk_ids": [
+        "117c37f8b576e971468cbe8c6e8c77a476d76fb6610fd7ffa33476efc7f4fecc",
+        "2f2d0644d976adc9543b51b245d4f72cf41900bc558429675a8c93e347e6a7de",
+        "98e6f611f08475cd3275aa624f63accde585ce964e57fc37f3ee953b20c88f40",
+        "cc7a0b48135312c48e4e2fed8021f952969895659c800dc8f9aa728c5d3c0886",
+        "0338d25f38f54bdaa5e5a534dc8d8df4e641697bf19796076a08e73bc833038b"
+      ],
+      "metrics": {
+        "candidate_count": 5,
+        "citation_count": 1,
+        "citation_source_correctness": 1.0,
+        "citation_span_correctness": 1.0,
+        "citation_support": 0.0,
+        "forbidden_source_violation": 0.0,
+        "latency_capture_release_ms": 0.000541,
+        "latency_citation_ms": 0.062167,
+        "latency_generate_ms": 4158.197625,
+        "latency_pack_ms": 0.024624,
+        "latency_release_filter_ms": 0.014083,
+        "latency_rerank_ms": 0.007792,
+        "latency_retrieve_ms": 30.658708,
+        "mrr": 1.0,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "required_phrase_coverage": 1.0,
+        "total_latency_ms": 4188.96554
+      },
+      "no_mixed_release": true,
+      "retriever_kind": "bm25",
+      "returned_release_ids": [
+        "v1"
+      ],
+      "source_ids": [
+        "approval-matrix",
+        "office-snacks",
+        "device-security",
+        "travel-wifi-current",
+        "finance-memo-obsolete"
+      ]
+    },
+    {
+      "answer_excerpt": "An employee can reclaim $25 per travel day for wireless access at a hotel on a work trip. [1]",
+      "captured_release": "v1",
+      "case_id": "semantic_travel_connectivity",
+      "chunk_ids": [
+        "cc7a0b48135312c48e4e2fed8021f952969895659c800dc8f9aa728c5d3c0886",
+        "e04e2793bd19f39d12945f2adf1905a7d9a8120403dda4088d1e8301a9c39f47",
+        "0338d25f38f54bdaa5e5a534dc8d8df4e641697bf19796076a08e73bc833038b",
+        "98e6f611f08475cd3275aa624f63accde585ce964e57fc37f3ee953b20c88f40",
+        "2f2d0644d976adc9543b51b245d4f72cf41900bc558429675a8c93e347e6a7de"
+      ],
+      "metrics": {
+        "candidate_count": 5,
+        "citation_count": 1,
+        "citation_source_correctness": 1.0,
+        "citation_span_correctness": 1.0,
+        "citation_support": 0.0,
+        "forbidden_source_violation": 0.0,
+        "latency_capture_release_ms": 0.001,
+        "latency_citation_ms": 0.070625,
+        "latency_generate_ms": 2488.538458,
+        "latency_pack_ms": 0.033583,
+        "latency_release_filter_ms": 0.020334,
+        "latency_rerank_ms": 0.010958,
+        "latency_retrieve_ms": 5.87175,
+        "mrr": 1.0,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "required_phrase_coverage": 0.5,
+        "total_latency_ms": 2494.546708
+      },
+      "no_mixed_release": true,
+      "retriever_kind": "bm25",
+      "returned_release_ids": [
+        "v1"
+      ],
+      "source_ids": [
+        "travel-wifi-current",
+        "contractor-scope",
+        "finance-memo-obsolete",
+        "device-security",
+        "office-snacks"
+      ]
+    },
+    {
+      "answer_excerpt": "The current daily hotel internet reimbursement limit is $25 per travel day. [2]",
+      "captured_release": "v1",
+      "case_id": "obsolete_source_trap",
+      "chunk_ids": [
+        "0338d25f38f54bdaa5e5a534dc8d8df4e641697bf19796076a08e73bc833038b",
+        "cc7a0b48135312c48e4e2fed8021f952969895659c800dc8f9aa728c5d3c0886",
+        "e04e2793bd19f39d12945f2adf1905a7d9a8120403dda4088d1e8301a9c39f47",
+        "2f2d0644d976adc9543b51b245d4f72cf41900bc558429675a8c93e347e6a7de",
+        "98e6f611f08475cd3275aa624f63accde585ce964e57fc37f3ee953b20c88f40"
+      ],
+      "metrics": {
+        "candidate_count": 5,
+        "citation_count": 1,
+        "citation_source_correctness": 1.0,
+        "citation_span_correctness": 1.0,
+        "citation_support": 0.0,
+        "forbidden_source_violation": 0.0,
+        "latency_capture_release_ms": 0.001126,
+        "latency_citation_ms": 0.072708,
+        "latency_generate_ms": 2238.701791,
+        "latency_pack_ms": 0.035541,
+        "latency_release_filter_ms": 0.023792,
+        "latency_rerank_ms": 0.0125,
+        "latency_retrieve_ms": 6.502084,
+        "mrr": 0.5,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "required_phrase_coverage": 1.0,
+        "total_latency_ms": 2245.349542
+      },
+      "no_mixed_release": true,
+      "retriever_kind": "bm25",
+      "returned_release_ids": [
+        "v1"
+      ],
+      "source_ids": [
+        "finance-memo-obsolete",
+        "travel-wifi-current",
+        "contractor-scope",
+        "office-snacks",
+        "device-security"
+      ]
+    },
+    {
+      "answer_excerpt": "Under corpus version 2, the daily limit for hotel Wi-Fi on approved business travel is $25 per travel day. [1]",
+      "captured_release": "v1",
+      "case_id": "version_change_wifi_limit",
+      "chunk_ids": [
+        "cc7a0b48135312c48e4e2fed8021f952969895659c800dc8f9aa728c5d3c0886",
+        "0338d25f38f54bdaa5e5a534dc8d8df4e641697bf19796076a08e73bc833038b",
+        "2f2d0644d976adc9543b51b245d4f72cf41900bc558429675a8c93e347e6a7de",
+        "117c37f8b576e971468cbe8c6e8c77a476d76fb6610fd7ffa33476efc7f4fecc",
+        "98e6f611f08475cd3275aa624f63accde585ce964e57fc37f3ee953b20c88f40"
+      ],
+      "metrics": {
+        "candidate_count": 5,
+        "citation_count": 1,
+        "citation_source_correctness": 1.0,
+        "citation_span_correctness": 1.0,
+        "citation_support": 0.0,
+        "forbidden_source_violation": 0.0,
+        "latency_capture_release_ms": 0.001167,
+        "latency_citation_ms": 0.076667,
+        "latency_generate_ms": 2293.682208,
+        "latency_pack_ms": 0.034541,
+        "latency_release_filter_ms": 0.022667,
+        "latency_rerank_ms": 0.013625,
+        "latency_retrieve_ms": 6.759334,
+        "mrr": 1.0,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "required_phrase_coverage": 0.0,
+        "total_latency_ms": 2300.590209
+      },
+      "no_mixed_release": true,
+      "retriever_kind": "bm25",
+      "returned_release_ids": [
+        "v1"
+      ],
+      "source_ids": [
+        "travel-wifi-current",
+        "finance-memo-obsolete",
+        "office-snacks",
+        "approval-matrix",
+        "device-security"
+      ]
+    }
+  ],
+  "phase_b_queries": [
+    {
+      "answer_excerpt": "Contractors do not use the employee reimbursement program and may only bill a business expense if the signed statement of work explicitly marks that expense as reimbursable; otherwise, the contractor ",
+      "captured_release": "v2",
+      "case_id": "multi_fact_wifi",
+      "chunk_ids": [
+        "83451783800288f0971810d8a882e56dc40c722f103df2533e9a1321650a9366",
+        "db0a6c8c8c3236759d34b2a933d955ec9431d8a8eded8af4a877887fb73673f3",
+        "62d49dfb1a047e046a6e70d2aad6d7a9c9114289baaa46fb70b6c15bdd95d197",
+        "689b034102af3965d34f5f1213fbf76fae2c6ee8a7a99e75c4be53b2c55101a9",
+        "b86ad6e62dafb1ad0f45a95ed7b8db46f77fd2b3d757437d4ab3da49b3ff5bb5"
+      ],
+      "metrics": {
+        "candidate_count": 5,
+        "citation_count": 2,
+        "citation_source_correctness": 0.5,
+        "citation_span_correctness": 1.0,
+        "citation_support": 0.0,
+        "forbidden_source_violation": 1.0,
+        "latency_capture_release_ms": 0.000417,
+        "latency_citation_ms": 0.048958,
+        "latency_embed_ms": 47.524542,
+        "latency_generate_ms": 3227.532958,
+        "latency_identity_ms": 0.035584,
+        "latency_pack_ms": 0.007667,
+        "latency_parse_ms": 1.42725,
+        "latency_release_filter_ms": 0.004833,
+        "latency_rerank_ms": 0.002583,
+        "latency_retrieve_ms": 19.616375,
+        "latency_split_ms": 0.947375,
+        "latency_store_ms": 2.277958,
+        "mrr": 1.0,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "required_phrase_coverage": 1.0,
+        "total_latency_ms": 3299.4265
+      },
+      "no_mixed_release": true,
+      "retriever_kind": "ollama_dense",
+      "returned_release_ids": [
+        "v2"
+      ],
+      "source_ids": [
+        "travel-wifi-current",
+        "finance-memo-obsolete",
+        "device-security",
+        "contractor-scope",
+        "approval-matrix"
+      ]
+    },
+    {
+      "answer_excerpt": "Rule ID AP-50 requires that any single reimbursement claim above $50 must have manager approval before submission. Claims of $50 or less follow the standard receipt review. [1]",
+      "captured_release": "v2",
+      "case_id": "exact_identifier_ap50",
+      "chunk_ids": [
+        "b86ad6e62dafb1ad0f45a95ed7b8db46f77fd2b3d757437d4ab3da49b3ff5bb5",
+        "62d49dfb1a047e046a6e70d2aad6d7a9c9114289baaa46fb70b6c15bdd95d197",
+        "83451783800288f0971810d8a882e56dc40c722f103df2533e9a1321650a9366",
+        "db0a6c8c8c3236759d34b2a933d955ec9431d8a8eded8af4a877887fb73673f3",
+        "689b034102af3965d34f5f1213fbf76fae2c6ee8a7a99e75c4be53b2c55101a9"
+      ],
+      "metrics": {
+        "candidate_count": 5,
+        "citation_count": 1,
+        "citation_source_correctness": 1.0,
+        "citation_span_correctness": 1.0,
+        "citation_support": 0.0,
+        "forbidden_source_violation": 0.0,
+        "latency_capture_release_ms": 0.001208,
+        "latency_citation_ms": 0.088125,
+        "latency_generate_ms": 4714.1365,
+        "latency_pack_ms": 0.026125,
+        "latency_release_filter_ms": 0.021375,
+        "latency_rerank_ms": 0.009416,
+        "latency_retrieve_ms": 22.668375,
+        "mrr": 1.0,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "required_phrase_coverage": 1.0,
+        "total_latency_ms": 4736.951124
+      },
+      "no_mixed_release": true,
+      "retriever_kind": "bm25",
+      "returned_release_ids": [
+        "v2"
+      ],
+      "source_ids": [
+        "approval-matrix",
+        "device-security",
+        "travel-wifi-current",
+        "finance-memo-obsolete",
+        "contractor-scope"
+      ]
+    },
+    {
+      "answer_excerpt": "An employee can reclaim up to $30 per travel day for wireless access at a hotel on a work trip. [1]",
+      "captured_release": "v2",
+      "case_id": "semantic_travel_connectivity",
+      "chunk_ids": [
+        "83451783800288f0971810d8a882e56dc40c722f103df2533e9a1321650a9366",
+        "689b034102af3965d34f5f1213fbf76fae2c6ee8a7a99e75c4be53b2c55101a9",
+        "db0a6c8c8c3236759d34b2a933d955ec9431d8a8eded8af4a877887fb73673f3",
+        "62d49dfb1a047e046a6e70d2aad6d7a9c9114289baaa46fb70b6c15bdd95d197",
+        "b86ad6e62dafb1ad0f45a95ed7b8db46f77fd2b3d757437d4ab3da49b3ff5bb5"
+      ],
+      "metrics": {
+        "candidate_count": 5,
+        "citation_count": 1,
+        "citation_source_correctness": 1.0,
+        "citation_span_correctness": 1.0,
+        "citation_support": 0.0,
+        "forbidden_source_violation": 0.0,
+        "latency_capture_release_ms": 0.001666,
+        "latency_citation_ms": 0.081417,
+        "latency_generate_ms": 2837.558875,
+        "latency_pack_ms": 0.036625,
+        "latency_release_filter_ms": 0.028875,
+        "latency_rerank_ms": 0.013333,
+        "latency_retrieve_ms": 6.770791,
+        "mrr": 1.0,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "required_phrase_coverage": 0.0,
+        "total_latency_ms": 2844.491582
+      },
+      "no_mixed_release": true,
+      "retriever_kind": "bm25",
+      "returned_release_ids": [
+        "v2"
+      ],
+      "source_ids": [
+        "travel-wifi-current",
+        "contractor-scope",
+        "finance-memo-obsolete",
+        "device-security",
+        "approval-matrix"
+      ]
+    },
+    {
+      "answer_excerpt": "The current daily hotel internet reimbursement limit is $30 per travel day. [2]",
+      "captured_release": "v2",
+      "case_id": "obsolete_source_trap",
+      "chunk_ids": [
+        "db0a6c8c8c3236759d34b2a933d955ec9431d8a8eded8af4a877887fb73673f3",
+        "83451783800288f0971810d8a882e56dc40c722f103df2533e9a1321650a9366",
+        "689b034102af3965d34f5f1213fbf76fae2c6ee8a7a99e75c4be53b2c55101a9",
+        "62d49dfb1a047e046a6e70d2aad6d7a9c9114289baaa46fb70b6c15bdd95d197",
+        "b86ad6e62dafb1ad0f45a95ed7b8db46f77fd2b3d757437d4ab3da49b3ff5bb5"
+      ],
+      "metrics": {
+        "candidate_count": 5,
+        "citation_count": 1,
+        "citation_source_correctness": 1.0,
+        "citation_span_correctness": 1.0,
+        "citation_support": 0.0,
+        "forbidden_source_violation": 0.0,
+        "latency_capture_release_ms": 0.001542,
+        "latency_citation_ms": 0.081208,
+        "latency_generate_ms": 2593.542625,
+        "latency_pack_ms": 0.035417,
+        "latency_release_filter_ms": 0.024208,
+        "latency_rerank_ms": 0.012417,
+        "latency_retrieve_ms": 6.315499,
+        "mrr": 0.5,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "required_phrase_coverage": 0.5,
+        "total_latency_ms": 2600.012916
+      },
+      "no_mixed_release": true,
+      "retriever_kind": "bm25",
+      "returned_release_ids": [
+        "v2"
+      ],
+      "source_ids": [
+        "finance-memo-obsolete",
+        "travel-wifi-current",
+        "contractor-scope",
+        "device-security",
+        "approval-matrix"
+      ]
+    },
+    {
+      "answer_excerpt": "Under corpus version 2, the daily limit for hotel Wi-Fi on approved business travel is $30 per travel day. [1]",
+      "captured_release": "v2",
+      "case_id": "version_change_wifi_limit",
+      "chunk_ids": [
+        "83451783800288f0971810d8a882e56dc40c722f103df2533e9a1321650a9366",
+        "db0a6c8c8c3236759d34b2a933d955ec9431d8a8eded8af4a877887fb73673f3",
+        "b86ad6e62dafb1ad0f45a95ed7b8db46f77fd2b3d757437d4ab3da49b3ff5bb5",
+        "62d49dfb1a047e046a6e70d2aad6d7a9c9114289baaa46fb70b6c15bdd95d197",
+        "689b034102af3965d34f5f1213fbf76fae2c6ee8a7a99e75c4be53b2c55101a9"
+      ],
+      "metrics": {
+        "candidate_count": 5,
+        "citation_count": 1,
+        "citation_source_correctness": 1.0,
+        "citation_span_correctness": 1.0,
+        "citation_support": 0.0,
+        "forbidden_source_violation": 0.0,
+        "latency_capture_release_ms": 0.001542,
+        "latency_citation_ms": 0.078083,
+        "latency_generate_ms": 2297.154792,
+        "latency_pack_ms": 0.035334,
+        "latency_release_filter_ms": 0.024917,
+        "latency_rerank_ms": 0.011917,
+        "latency_retrieve_ms": 6.287292,
+        "mrr": 1.0,
+        "recall_at_k": 1.0,
+        "release_consistency": 1.0,
+        "required_phrase_coverage": 0.5,
+        "total_latency_ms": 2303.593877
+      },
+      "no_mixed_release": true,
+      "retriever_kind": "bm25",
+      "returned_release_ids": [
+        "v2"
+      ],
+      "source_ids": [
+        "travel-wifi-current",
+        "finance-memo-obsolete",
+        "approval-matrix",
+        "device-security",
+        "contractor-scope"
+      ]
+    }
+  ],
+  "pointer_after_failed_promotion": {
+    "release_id": "v1"
+  },
+  "pointer_after_recovery_promotion": {
+    "release_id": "v2"
+  },
+  "pointer_before_partial_attempt": {
+    "release_id": "v1"
+  },
+  "run_id": "failure-injection-20260824T064637",
+  "started_at": "2026-08-24T06:46:37+00:00",
+  "trace_event_counts": {
+    "first_failure_trace": 45,
+    "post_recovery_trace": 40
+  }
+}

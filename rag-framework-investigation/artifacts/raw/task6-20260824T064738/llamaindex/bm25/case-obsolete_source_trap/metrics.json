@@ -1,0 +1,20 @@
+{
+  "candidate_count": 5,
+  "citation_count": 1,
+  "citation_source_correctness": 1.0,
+  "citation_span_correctness": 1.0,
+  "citation_support": 0.5,
+  "forbidden_source_violation": 0.0,
+  "latency_capture_release_ms": 0.00025,
+  "latency_citation_ms": 0.030125,
+  "latency_generate_ms": 1042.973666,
+  "latency_pack_ms": 0.006208,
+  "latency_release_filter_ms": 0.004208,
+  "latency_rerank_ms": 0.002333,
+  "latency_retrieve_ms": 1.889458,
+  "mrr": 0.5,
+  "recall_at_k": 1.0,
+  "release_consistency": 1.0,
+  "required_phrase_coverage": 1.0,
+  "total_latency_ms": 1044.906248
+}
