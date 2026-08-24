@@ -30,14 +30,15 @@ def table_a(summary: dict) -> str:
     lines = [
         "| Condition | recall@k | MRR | citation span correctness (byte-verified) "
         "| citation source correctness | citation support | required-phrase coverage "
-        "| mean citations/case | release consistency | retrieve ms | generate ms | total ms |",
+        "| mean citations/case | release consistency "
+        "| retrieve ms | generate ms | total ms |",
         "|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for cond in summary["conditions"]:
         m = cond["observed_metric_means"]
         lines.append(
-            "| {cond} | {recall} | {mrr} | {span} | {src} | {sup} | {cov} | {cit} | {rel} "
-            "| {ret} | {gen} | {tot} |".format(
+            "| {cond} | {recall} | {mrr} | {span} | {src} | {sup} | {cov} "
+            "| {cit} | {rel} | {ret} | {gen} | {tot} |".format(
                 cond=cond["condition_id"],
                 recall=fmt(m["recall_at_k"], 1),
                 mrr=fmt(m["mrr"], 2),
@@ -69,15 +70,21 @@ def table_b(csv_path: Path) -> str:
             order.append(r["case_id"])
         if key[1] not in conds:
             conds.append(key[1])
-    short = {c: ("LI " if c.startswith("llamaindex") else "HS ") +
-             ("bm25" if c.endswith("bm25") else "dense") for c in conds}
-    lines = ["| Case | " + " | ".join(short[c] for c in conds) + " |",
-             "|---|" + "---|" * len(conds)]
+    short = {
+        c: ("LI " if c.startswith("llamaindex") else "HS ")
+        + ("bm25" if c.endswith("bm25") else "dense")
+        for c in conds
+    }
+    lines = [
+        "| Case | " + " | ".join(short[c] for c in conds) + " |",
+        "|---|" + "---|" * len(conds),
+    ]
     for case in order:
-        lines.append(f"| {case} | " +
-                     " | ".join(f"{mrr[(case, c)]:.3f}".rstrip("0").rstrip(".") if
-                                mrr[(case, c)] % 1 else f"{mrr[(case, c)]:.1f}"
-                                for c in conds) + " |")
+        cells = []
+        for c in conds:
+            v = mrr[(case, c)]
+            cells.append(f"{v:.3f}".rstrip("0").rstrip(".") if v % 1 else f"{v:.1f}")
+        lines.append(f"| {case} | " + " | ".join(cells) + " |")
     return "\n".join(lines)
 
 
@@ -85,43 +92,63 @@ def table_b(csv_path: Path) -> str:
 
 def table_c(fi: dict) -> tuple[str, int]:
     hs, li = fi["haystack"], fi["llamaindex"]
+    ha, la = hs["assertions"], li["assertions"]
     partial_err = hs.get("partial_promotion_error") or li.get("partial_promotion_error")
     checks = [
-        ("Partial v2 promotion (3 of 5 docs staged + indexed)",
-         "rejected by validation",
-         f'error "{partial_err}"',
-         hs["assertions"]["partial_promotion_rejected"] and li["assertions"]["partial_promotion_rejected"]),
-        ("Active pointer after failed promotion",
-         'byte-identical `{"release_id": "v1"}`',
-         "pointer unchanged",
-         hs["assertions"]["pointer_unchanged_after_failure"] and li["assertions"]["pointer_unchanged_after_failure"]),
-        ("Phase A queries (release captured v1)",
-         "only v1 chunks, no v2 leakage",
-         "all returned_release_ids = [\"v1\"], no_mixed_release true, both retrievers",
-         hs["assertions"]["phase_a_all_results_v1"] and hs["assertions"]["phase_a_no_v2_chunk_returned"]
-         and li["assertions"]["phase_a_all_results_v1"] and li["assertions"]["phase_a_no_v2_chunk_returned"]),
-        ("Mixed-release filter",
-         "raises on foreign chunk",
-         "`filter_chunks_for_release` raised MixedReleaseError",
-         hs["assertions"]["mixed_release_filter_raises"] and li["assertions"]["mixed_release_filter_raises"]),
-        ("Complete v2 validation + promotion",
-         "passes, one atomic replace",
-         'pointer → `{"release_id": "v2"}`',
-         hs["assertions"]["complete_v2_validated_and_promoted"] and li["assertions"]["complete_v2_validated_and_promoted"]),
-        ("Phase B queries after promotion",
-         "only v2 chunks",
-         'all returned_release_ids = ["v2"]',
-         hs["assertions"]["phase_b_all_results_v2"] and li["assertions"]["phase_b_all_results_v2"]),
-        ("Deleted v1 content (office-snacks)",
-         "never returned under v2",
-         "absent from all Phase B contexts",
-         hs["assertions"]["office_snacks_absent_after_v2"] and li["assertions"]["deleted_v1_content_not_returned"]
-         and li["assertions"]["office_snacks_absent_after_v2"] and hs["assertions"]["deleted_v1_content_not_returned"]),
+        (
+            "Partial v2 promotion (3 of 5 docs staged + indexed)",
+            "rejected by validation",
+            f'error "{partial_err}"',
+            ha["partial_promotion_rejected"] and la["partial_promotion_rejected"],
+        ),
+        (
+            "Active pointer after failed promotion",
+            'byte-identical `{"release_id": "v1"}`',
+            "pointer unchanged",
+            ha["pointer_unchanged_after_failure"]
+            and la["pointer_unchanged_after_failure"],
+        ),
+        (
+            "Phase A queries (release captured v1)",
+            "only v1 chunks, no v2 leakage",
+            'all returned_release_ids = ["v1"], no_mixed_release true, '
+            "both retrievers",
+            ha["phase_a_all_results_v1"]
+            and ha["phase_a_no_v2_chunk_returned"]
+            and la["phase_a_all_results_v1"]
+            and la["phase_a_no_v2_chunk_returned"],
+        ),
+        (
+            "Mixed-release filter",
+            "raises on foreign chunk",
+            "`filter_chunks_for_release` raised MixedReleaseError",
+            ha["mixed_release_filter_raises"] and la["mixed_release_filter_raises"],
+        ),
+        (
+            "Complete v2 validation + promotion",
+            "passes, one atomic replace",
+            'pointer → `{"release_id": "v2"}`',
+            ha["complete_v2_validated_and_promoted"]
+            and la["complete_v2_validated_and_promoted"],
+        ),
+        (
+            "Phase B queries after promotion",
+            "only v2 chunks",
+            'all returned_release_ids = ["v2"]',
+            ha["phase_b_all_results_v2"] and la["phase_b_all_results_v2"],
+        ),
+        (
+            "Deleted v1 content (office-snacks)",
+            "never returned under v2",
+            "absent from all Phase B contexts",
+            ha["office_snacks_absent_after_v2"]
+            and ha["deleted_v1_content_not_returned"]
+            and la["office_snacks_absent_after_v2"]
+            and la["deleted_v1_content_not_returned"],
+        ),
     ]
     lines = ["| Check | Expected | Observed | Result |", "|---|---|---|---|"]
-    n_true = 0
     for check, exp, obs, ok in checks:
-        n_true += sum(a.values()) if False else 0  # placeholder, counted below
         lines.append(f"| {check} | {exp} | {obs} | {'✅' if ok else '❌'} |")
     total_assertions = sum(sum(fw["assertions"].values()) for fw in (hs, li))
     return "\n".join(lines), total_assertions
@@ -142,10 +169,10 @@ def main() -> None:
         r"Run ID: `task6-[\dT]+` \(wall clock [\d.]+ s, status `\w+`[^\n]*",
         f"Run ID: `{summary['run_id']}` (wall clock {summary['wall_clock_seconds']} s, "
         f"status `{summary['status']}` — control validation AND quality gates). "
-        "Fresh rerun after the release-inventory layout fix; pre-rerun artifacts archived "
-        "at `artifacts/raw/archive-prerun-20260824-fresh/`. All quality metrics reproduced "
-        "exactly from the prior run (`task6-20260824T052921`); only host-dependent latencies "
-        "shifted marginally.",
+        "Fresh rerun after the release-inventory layout fix; pre-rerun artifacts "
+        "archived at `artifacts/raw/archive-prerun-20260824-fresh/`. All quality "
+        "metrics reproduced exactly from the prior run (`task6-20260824T052921`); "
+        "only host-dependent latencies shifted marginally.",
         text,
     )
 
@@ -162,22 +189,32 @@ def main() -> None:
     assert n == 3, f"expected 3 tables, replaced {n}"
 
     # Failure-injection section heading + trailing sentence: canonical run ids.
+    fi_head_re = (
+        r"runs `failure-injection-[\dT]+` \(llamaindex\) "
+        r"and `failure-injection-[\dT]+` \(haystack\)"
+    )
     text = re.sub(
-        r"runs `failure-injection-[\dT]+` \(llamaindex\) and `failure-injection-[\dT]+` \(haystack\)",
+        fi_head_re,
         f"runs `{li_run}` (llamaindex) and `{hs_run}` (haystack)",
         text,
     )
+    tail_re = (
+        r"All \d+ recorded assertions true — 9 per framework "
+        r"\(runs `failure-injection-[\dT]+` llamaindex / `[\dT]+` haystack\)"
+    )
     text = re.sub(
-        r"All \d+ recorded assertions true — 9 per framework \(runs `failure-injection-[\dT]+` llamaindex / `[\dT]+` haystack\)",
+        tail_re,
         f"All {n_assert} recorded assertions true — 9 per framework "
         f"(runs `{li_run}` llamaindex / `{hs_run}` haystack)",
         text,
     )
 
     PAPER.write_text(text)
-    print(f"regenerated {PAPER.relative_to(ROOT)}: 3 tables, "
-          f"run {summary['run_id']}, wall {summary['wall_clock_seconds']}s, "
-          f"fi runs {li_run}/{hs_run}, {n_assert}/18 assertions")
+    print(
+        f"regenerated {PAPER.relative_to(ROOT)}: 3 tables, "
+        f"run {summary['run_id']}, wall {summary['wall_clock_seconds']}s, "
+        f"fi runs {li_run}/{hs_run}, {n_assert}/18 assertions"
+    )
 
 
 if __name__ == "__main__":
