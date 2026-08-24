@@ -1,5 +1,22 @@
-# Runtime dependencies (none required by src/rag_compare itself)
+# Requirements mirror of pyproject.toml (kept in sync by hand).
+# Install with the repository's documented flow instead of this file alone:
+#   pip install -e '.[dev,frameworks]'
+#   pip install -e ../llama_index   # pinned clone, see config/repository-manifest.json
+#   pip install -e ../haystack      # pinned clone, see config/repository-manifest.json
 
-# Development / tooling
+# Direct imports of the shared framework-independent layer (src/rag_compare):
+tiktoken>=0.7          # cl100k_base token-window splitter (adapters/base.py)
+requests>=2.31         # Ollama HTTP client (ollama.py)
+
+# Retrieval integrations required by both adapters (pyproject [frameworks]):
+llama-index-retrievers-bm25==0.7.1
+rank_bm25==0.2.2
+
+# Development / tooling (pyproject [dev]):
 pytest>=8.0
 ruff>=0.6
+
+# Versions verified in the recreated submission environment (.venv, Python 3.12):
+#   tiktoken 0.14.0, requests 2.34.2, llama-index-core 0.14.24,
+#   llama-index-retrievers-bm25 0.7.1, rank-bm25 0.2.2, bm25s 0.3.10,
+#   haystack-ai 3.2.0rc0 (editable pinned clone), pytest 9.1.1, ruff 0.16.4
