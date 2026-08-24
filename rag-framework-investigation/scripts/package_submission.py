@@ -31,6 +31,21 @@ ARTIFACT_SIZE_LIMIT_BYTES = 2 * 1024 * 1024  # 2 MiB per file
 
 # Explicit allowlist: exact files and directories (recursed) relative to the
 # project root. Everything not listed here never enters the archive.
+# WEEK2_ROOT_FILES are relative to the week2/ directory (PROJECT_ROOT.parent)
+# and are archived under the week2/ prefix so the ZIP contains the complete
+# week2 folder including all material task prompts.
+WEEK2_ROOT_FILES = [
+    "PROBLEM_STATEMENT.md",
+    "PLAN.md",
+    "ARCHITECTURE.md",
+    "TASKS.md",
+    "README.md",
+]
+
+WEEK2_DIRS = [
+    "prompts",  # material task prompts + PROMPT-ARTIFACT-MAP.md (recursed)
+]
+
 ALLOWED_FILES = [
     "README.md",
     "pyproject.toml",
@@ -88,6 +103,23 @@ ALLOWED_DIRS = [
 ]
 
 REQUIRED_MEMBERS = [
+    # complete week2 planning material + every task prompt
+    "week2/PROBLEM_STATEMENT.md",
+    "week2/PLAN.md",
+    "week2/ARCHITECTURE.md",
+    "week2/TASKS.md",
+    "week2/AI_COLLABORATION.md",
+    "week2/prompts/task-1.md",
+    "week2/prompts/task-2.md",
+    "week2/prompts/task-3.md",
+    "week2/prompts/task-4.md",
+    "week2/prompts/task-5.md",
+    "week2/prompts/task-6.md",
+    "week2/prompts/task-7.md",
+    "week2/prompts/task-8-draft.md",
+    "week2/prompts/task-8-review.md",
+    "week2/prompts/task-9.md",
+    "week2/prompts/PROMPT-ARTIFACT-MAP.md",
     "README.md",
     "config/experiment.json",
     "config/repository-manifest.json",
@@ -146,12 +178,26 @@ def iter_allowlist() -> list[Path]:
             candidates.add(path)
         else:
             candidates.update(p for p in path.rglob("*") if p.is_file())
+    week2_root = PROJECT_ROOT.parent
+    for entry in WEEK2_ROOT_FILES:
+        path = week2_root / entry
+        if not path.is_file():
+            raise FileNotFoundError(f"allowlisted week2 file does not exist: {entry}")
+        candidates.add(path)
+    for entry in WEEK2_DIRS:
+        path = week2_root / entry
+        if not path.is_dir():
+            raise FileNotFoundError(f"allowlisted week2 dir does not exist: {entry}")
+        candidates.update(p for p in path.rglob("*") if p.is_file())
     return sorted(candidates)
 
 
 def check_allowed(path: Path) -> str | None:
     """Return a rejection reason for ``path``, or None if it may be archived."""
-    rel = path.relative_to(PROJECT_ROOT).as_posix()
+    if path.is_relative_to(PROJECT_ROOT):
+        rel = path.relative_to(PROJECT_ROOT).as_posix()
+    else:
+        rel = f"week2/{path.relative_to(PROJECT_ROOT.parent).as_posix()}"
     for fragment in DENYLIST_FRAGMENTS:
         if fragment in f"{rel}/":
             return f"prohibited fragment {fragment!r}"
@@ -179,15 +225,19 @@ def build_zip() -> dict:
                     }
                 )
                 continue
-            arcname = path.relative_to(PROJECT_ROOT).as_posix()
+            arcname = (
+                path.relative_to(PROJECT_ROOT).as_posix()
+                if path.is_relative_to(PROJECT_ROOT)
+                else f"week2/{path.relative_to(PROJECT_ROOT.parent).as_posix()}"
+            )
             zf.write(path, arcname)
             included.append(arcname)
 
-        # Disclosure lives one level up from the project root.
+        # Disclosure lives inside week2/, archived under its own prefix.
         disclosure = PROJECT_ROOT.parent / "AI_COLLABORATION.md"
         if disclosure.is_file():
-            zf.write(disclosure, "AI_COLLABORATION.md")
-            included.append("AI_COLLABORATION.md")
+            zf.write(disclosure, "week2/AI_COLLABORATION.md")
+            included.append("week2/AI_COLLABORATION.md")
 
     return {"included": included, "rejected": rejected}
 

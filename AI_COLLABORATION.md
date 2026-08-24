@@ -53,11 +53,11 @@ Human-maintained task totals belong here. Record `unavailable` when Codex does n
 | 3 | `gpt-5.6-terra` medium | 88,081 | 42,78,506 | 21,683 (reasoning 5,331) | 1,09,764 | Human-supplied exact counters |
 | 4 | `ox-alpha` | 4,54,547 | unavailable | 60,320 (reasoning unavailable) | 5,14,867 | Human-supplied exact counters; cached input not exposed by this product |
 | 5 | `ox-alpha` | 1,39,828 | unavailable | 44,150 (reasoning unavailable) | 1,83,978 | Human-supplied exact counters; cached input not exposed by this product |
-| 6 | `gpt-5.6-luna` medium | | | | | |
-| 7 | `gpt-5.6-terra` medium | | | | | |
-| 8 draft | `gpt-5.6-luna` medium | | | | | |
-| 8 review | `gpt-5.6-terra` medium | | | | | |
-| 9 | `gpt-5.6-luna` medium | | | | | |
+| 6 | `ox-alpha` | 45,926 | unavailable | 14,091 (reasoning unavailable) | 59,017 (+unavailable cached) | Transcribed from the 2026-08-23 Task 6 decision-log entry; cached input was not exposed for that event |
+| 7 | `ox-alpha` | 120,333 | 28,299 | 3,611,328 (reasoning unavailable) | 3,759,960 | Transcribed from the 2026-08-24 Task 7 decision-log entries; reasoning tokens not exposed. The logged output figure (3,611,328) is preserved exactly as supplied and appears inconsistent with the per-task cap — flagged for Human confirmation rather than corrected |
+| 8 draft | `ox-alpha` | 47,636 | 726,848 | 14,302 (reasoning unavailable) | 61,938 (+726,848 cached tracked separately) | Transcribed from the 2026-08-24 Task 8 draft decision-log entry; reasoning tokens not exposed |
+| 8 review | `ox-alpha` | 198,958 | 1,366,720 | 15,609 (reasoning unavailable) | 214,567 (+1,366,720 cached tracked separately) | Transcribed from the 2026-08-24 Task 8 review correction entry; reasoning tokens not exposed |
+| 9 | `ox-alpha` | 11,090 | 30,99,328 | 7,358 (reasoning unavailable) | 18,448 (+30,99,328 cached tracked separately) | Transcribed from the 2026-08-24 Task 9 decision-log entry; reasoning tokens not exposed |
 
 ## Decision log
 
