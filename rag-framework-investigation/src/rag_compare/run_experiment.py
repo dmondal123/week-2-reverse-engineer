@@ -350,7 +350,19 @@ def main(argv: list[str] | None = None) -> int:
                         json.dumps(result["citations"], indent=2) + "\n"
                     )
 
-                    metrics = evaluate_case(case, result, trace.events, top_k)
+                    # Immutable source bytes for byte-level citation-span
+                    # verification and claim-support grading: texts are read
+                    # fresh from the corpus files, never from packed context.
+                    source_texts = {
+                        entry["source_id"]: (
+                            (PROJECT_ROOT / "corpus" / entry["path"])
+                            .read_text(encoding="utf-8")
+                        )
+                        for entry in corpus_manifests[active_release]["documents"]
+                    }
+                    metrics = evaluate_case(
+                        case, result, trace.events, top_k, source_texts
+                    )
                     (case_dir / "metrics.json").write_text(
                         json.dumps(metrics, indent=2, sort_keys=True) + "\n"
                     )

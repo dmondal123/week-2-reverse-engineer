@@ -17,9 +17,14 @@ Metric definitions (deterministic):
 - ``citation_source_correctness``: correct citations / total citations,
   where a citation is correct iff its source_id is in the case's relevant
   set (0.0 when no citations were emitted)
-- ``citation_span_correctness``: citations whose [start, end] span exactly
-  matches the indexed candidate span for the cited chunk_id / total
-  citations (0.0 when no citations were emitted)
+- ``citation_span_correctness``: citations whose [start, end] span, when
+  re-sliced from the IMMUTABLE SOURCE BYTES on disk, reproduces the chunk
+  text bound to the cited chunk_id / total citations (0.0 when none). The
+  span is verified against the corpus file itself — never against the packed
+  candidate the citation was copied from.
+- ``citation_support``: fraction of required phrases present in the union of
+  cited spans' source text (case-insensitive); measures whether what the
+  answer CITED actually carries the expected facts
 - ``required_phrase_coverage``: fraction of the case's required_phrases
   present in the generated answer (case-insensitive); measures whether the
   answer itself carries the expected facts
@@ -79,22 +84,70 @@ def citation_source_correctness(
 
 
 def citation_span_correctness(
-    candidates: Sequence[Mapping], citations: Iterable[Mapping]
+    candidates: Sequence[Mapping],
+    citations: Iterable[Mapping],
+    source_texts: Mapping[str, str] | None = None,
 ) -> float:
-    """Share of citations whose span matches the indexed candidate's span."""
+    """Share of citations whose span verifies against immutable source bytes.
+
+    ``source_texts`` maps source_id -> the full raw text read directly from
+    the on-disk corpus. When provided, a citation counts as correct iff
+    re-slicing those bytes at the cited [start, end] yields exactly the text
+    bound to the cited chunk id (matched via the candidate table). Without
+    it the check degenerates to comparing the citation against the packed
+    candidate it was copied from — self-confirming — so the experiment
+    pipeline always supplies source texts.
+    """
     citations = list(citations)
     if not citations:
         return 0.0
-    span_by_chunk = {
-        candidate["chunk_id"]: list(candidate["span"]) for candidate in candidates
+    candidate_by_chunk = {
+        candidate["chunk_id"]: candidate for candidate in candidates
     }
-    correct = sum(
-        1
-        for c in citations
-        if c.get("chunk_id") in span_by_chunk
-        and list(c.get("span", [])) == span_by_chunk[c["chunk_id"]]
-    )
+
+    def _verify(citation: Mapping) -> bool:
+        chunk_id = citation.get("chunk_id")
+        candidate = candidate_by_chunk.get(chunk_id)
+        if candidate is None:
+            return False
+        if list(citation.get("span", [])) != list(candidate["span"]):
+            return False
+        if source_texts is None:
+            # Degraded mode: self-confirming comparison only.
+            return True
+        start, end = citation["span"]
+        source_text = source_texts.get(citation.get("source_id"))
+        if source_text is None or len(source_text) < end:
+            return False
+        # The cited span re-sliced from immutable source bytes must reproduce
+        # exactly the text bound to the cited chunk id.
+        return source_text[start:end] == candidate["text"]
+
+    correct = sum(1 for c in citations if _verify(c))
     return correct / len(citations)
+
+
+def citation_support(
+    required_phrases: Sequence[str],
+    citations: Iterable[Mapping],
+    source_texts: Mapping[str, str],
+) -> float:
+    """Fraction of required phrases present in cited spans' source text.
+
+    Independent claim-to-citation support grading: the union of cited spans,
+    re-sliced from immutable source bytes, must carry each expected fact.
+    """
+    if not required_phrases:
+        return 0.0
+    cited_text_parts: list[str] = []
+    for citation in citations:
+        start, end = citation["span"]
+        source_text = source_texts.get(citation.get("source_id"))
+        if source_text is not None and len(source_text) >= end:
+            cited_text_parts.append(source_text[start:end])
+    lowered = "\n".join(cited_text_parts).lower()
+    hits = sum(1 for phrase in required_phrases if phrase.lower() in lowered)
+    return hits / len(required_phrases)
 
 
 def required_phrase_coverage(required_phrases: Sequence[str], answer: str) -> float:
@@ -140,6 +193,7 @@ def evaluate_case(
     result: Mapping,
     trace_events: Sequence[Mapping],
     top_k: int,
+    source_texts: Mapping[str, str] | None = None,
 ) -> dict:
     """Compute every deterministic metric for one case-condition pair.
 
@@ -162,7 +216,14 @@ def evaluate_case(
             forbidden, citation_sources
         ),
         "citation_source_correctness": citation_source_correctness(relevant, citations),
-        "citation_span_correctness": citation_span_correctness(candidates, citations),
+                "citation_span_correctness": citation_span_correctness(
+            candidates, citations, source_texts
+        ),
+        "citation_support": citation_support(
+            list(case.get("required_phrases", [])),
+            citations,
+            source_texts if source_texts is not None else {},
+        ),
         "release_consistency": release_consistency(
             result["active_release"], candidates, citations
         ),
