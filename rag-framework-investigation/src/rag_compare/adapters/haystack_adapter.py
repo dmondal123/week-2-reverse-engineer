@@ -3,18 +3,16 @@
 Components are wired explicitly (converter/splitter, in-memory store,
 BM25/dense retrieval, filters, Ollama embedding); one stage event is emitted
 at each component boundary. Document identity lost by the splitter (HS-4) is
-restored by re-asserting contract IDs before the write (HS-1/HS-2).
+chunks are indexed exactly as derived by the shared splitter (HS-1/HS-2).
 """
 
 from __future__ import annotations
 
-import dataclasses
 import time
 from collections.abc import Mapping
 from pathlib import Path
 
 from haystack import Pipeline, component
-from haystack.components.preprocessors import DocumentSplitter
 from haystack.components.retrievers.in_memory import (
     InMemoryBM25Retriever,
     InMemoryEmbeddingRetriever,
@@ -98,39 +96,12 @@ class HaystackAdapter(BaseAdapter):
                 )
                 documents.append(document)
 
-            # Explicit splitter honoring the traced defaults (HS-3). Chunks are
-            # already below the window, so splitting must not change identity;
-            # any child id regeneration (HS-4) is reverted before the write.
-            splitter = DocumentSplitter(
-                split_by="word",
-                split_length=int(self.config["chunking"]["chunk_size_tokens"]),  # type: ignore[index]
-                split_overlap=int(self.config["chunking"]["chunk_overlap_tokens"]),  # type: ignore[index]
-            )
-            expected_ids = {document.id for document in documents}
-            vector_by_chunk = {
-                chunk["chunk_id"]: list(vector)
-                for chunk, vector in zip(chunks, vectors, strict=True)
-            }
-            by_content = {d.content or "": d for d in documents}
-            split_documents = splitter.run(documents=documents)["documents"]
-            restored = []
-            for child in split_documents:
-                original = by_content.get(child.content or "")
-                if original is not None and child.id != original.id:
-                    child = dataclasses.replace(
-                        child, id=original.id, meta=dict(original.meta)
-                    )
-                # The splitter does not propagate embeddings to children; the
-                # contract-stable embedding is re-asserted before the write.
-                if not child.embedding:
-                    child.embedding = vector_by_chunk[child.id]
-                restored.append(child)
-            if {doc.id for doc in restored} != expected_ids:
-                raise ValueError("splitter changed normalized chunk identities")
-
+            # Chunks arrive from the shared real token-window splitter, so no
+            # framework-native splitting runs here; identities are written
+            # exactly as derived (HS-4 regeneration is never triggered).
             store = InMemoryDocumentStore()
             writer = DocumentWriter(store, policy=DuplicatePolicy.FAIL)  # HS-2
-            writer.run(documents=restored)
+            writer.run(documents=documents)
             self._stores[rid] = {
                 "store": store,
                 "vectors": [list(vector) for vector in vectors],

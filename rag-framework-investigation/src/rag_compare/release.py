@@ -399,14 +399,21 @@ def _validate_index_inventory(release_dir_path: Path, manifest: Mapping) -> None
         if int(manifest["schema_version"]) == 2
         else "policy_version"
     )
-    expected_by_source: dict[str, object] = {}
+    expected_by_source: dict[str, list] = {}
+    size_tokens = int(manifest["chunker"]["size"])
+    overlap_tokens = int(manifest["chunker"]["overlap"])
     for relative in sorted(_discovered_corpus_files(release_dir_path, corpus_dir)):
         absolute = release_dir_path / PurePosixPath(relative)
         parsed = _adapter_base.parse_markdown_file(absolute)
-        chunk = _adapter_base.make_normalized_chunk(
-            parsed, manifest["release_id"], version_field
+        expected_by_source[parsed.source_id] = (
+            _adapter_base.make_normalized_chunks(
+                parsed,
+                manifest["release_id"],
+                version_field,
+                size_tokens=size_tokens,
+                overlap_tokens=overlap_tokens,
+            )
         )
-        expected_by_source[parsed.source_id] = chunk
 
     declared_sources = {entry.get("source_id") for entry in entries}
     if declared_sources != set(expected_by_source):
@@ -414,8 +421,12 @@ def _validate_index_inventory(release_dir_path: Path, manifest: Mapping) -> None
             "index chunk inventory source set does not match the corpus files"
         )
     for entry in entries:
-        chunk = expected_by_source[entry["source_id"]]
-        if entry["chunk_id"] != chunk["chunk_id"]:
+        expected_chunks = expected_by_source[entry["source_id"]]
+        chunk = next(
+            (c for c in expected_chunks if c["chunk_id"] == entry.get("chunk_id")),
+            None,
+        )
+        if chunk is None:
             raise ReleaseValidationError(
                 "inventory chunk id does not match the contract-derived id for "
                 + str(entry["source_id"])

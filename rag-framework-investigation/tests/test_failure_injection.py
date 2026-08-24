@@ -337,7 +337,7 @@ def claim_partial_v2_sections(adapter: HaystackAdapter) -> dict:
     return {
         "parser": {"identity": "markdown_front_matter_v1", "config": {}},
         "chunker": {
-            "identity": "token_window_whole_document_v1",
+            "identity": "token_window_cl100k_base_v2",
             "size": int(adapter.config["chunking"]["chunk_size_tokens"]),
             "overlap": int(adapter.config["chunking"]["chunk_overlap_tokens"]),
             "config_sha256": "0" * 64,

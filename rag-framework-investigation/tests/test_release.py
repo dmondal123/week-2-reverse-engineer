@@ -80,15 +80,16 @@ def complete_release(tmp_path, release_id):
     # Build the real contract-derived chunks exactly as adapters do, then
     # write the matching inventory artifact into the release directory.
     from rag_compare.adapters.base import (
-        make_normalized_chunk,
+        make_normalized_chunks,
         parse_markdown_file,
     )
 
     chunks = [
-        make_normalized_chunk(
+        chunk
+        for name in sorted(_CORPUS_BODIES)
+        for chunk in make_normalized_chunks(
             parse_markdown_file(corpus_dir / name), release_id, "policy_version"
         )
-        for name in sorted(_CORPUS_BODIES)
     ]
     manifest["index"]["chunk_inventory_sha256"] = write_index_inventory(
         release_dir, chunks
@@ -470,9 +471,14 @@ def test_manifest_declared_ids_match_contract_recomputation():
     contract computes — guards against stale declared metadata."""
     from pathlib import Path
 
-    from rag_compare.adapters.base import load_corpus, make_normalized_chunk
+    from rag_compare.adapters.base import load_corpus, make_normalized_chunks
 
     project_root = Path(__file__).resolve().parents[1]
+    config = json.loads(
+        (project_root / "config/experiment.json").read_text(encoding="utf-8")
+    )
+    size = int(config["chunking"]["chunk_size_tokens"])
+    overlap = int(config["chunking"]["chunk_overlap_tokens"])
     for version in ("v1", "v2"):
         manifest_path = project_root / "corpus" / version / "manifest.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -487,6 +493,16 @@ def test_manifest_declared_ids_match_contract_recomputation():
         }
         for entry in manifest["documents"]:
             parsed = parsed_docs[entry["source_id"]]
-            chunk = make_normalized_chunk(parsed, version, version_field)
-            assert entry["document_id"] == chunk["document_id"], entry["source_id"]
-            assert entry["chunk_ids"] == [chunk["chunk_id"]], entry["source_id"]
+            chunks = make_normalized_chunks(
+                parsed,
+                version,
+                version_field,
+                size_tokens=size,
+                overlap_tokens=overlap,
+            )
+            assert entry["document_id"] == chunks[0]["document_id"], (
+                entry["source_id"]
+            )
+            assert entry["chunk_ids"] == [c["chunk_id"] for c in chunks], (
+                entry["source_id"]
+            )

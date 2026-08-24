@@ -49,7 +49,7 @@ STAGE_ORDER = [
 FRONT_MATTER_PATTERN = re.compile(r"\A---\s*\n(.*?)\n---\s*\n?", re.DOTALL)
 
 PARSER_IDENTITY = "markdown_front_matter_v1"
-CHUNKER_IDENTITY = "token_window_whole_document_v1"
+CHUNKER_IDENTITY = "token_window_cl100k_base_v2"
 
 
 class AdapterError(ValueError):
@@ -186,37 +186,93 @@ def load_corpus(
     return documents
 
 
-def make_normalized_chunk(
+def token_char_offsets(text: str) -> list[int]:
+    """Char offset of every cl100k_base token start in ``text`` (exact spans)."""
+    import tiktoken  # deferred: only needed when real splitting runs
+
+    encoding = tiktoken.get_encoding("cl100k_base")
+    tokens = encoding.encode(text)
+    offsets = [0] * len(tokens)
+    for index in range(1, len(tokens)):
+        offsets[index] = len(encoding.decode(tokens[:index]))
+    return offsets
+
+
+def token_window_structures(
     parsed: ParsedDocument,
     release_id: str,
     version_field: str,
-) -> dict:
-    """Build the normalized whole-document chunk with contract-stable identity."""
-    return assign_identity(chunk_structure(parsed, release_id, version_field))
+    size_tokens: int,
+    overlap_tokens: int,
+) -> list[dict]:
+    """Real cl100k_base token-window chunking with exact character spans.
 
+    Implements the declared ``chunking`` configuration: windows of at most
+    ``size_tokens`` tokens advancing by ``size_tokens - overlap_tokens``.
+    Spans are exact char offsets into the raw file so the identity contract
+    (chunk ids over span+text) and later byte-level citation verification
+    remain well-defined. One whole-document chunk is produced only when the
+    body fits inside a single window.
+    """
+    if size_tokens < 1 or overlap_tokens < 0 or overlap_tokens >= size_tokens:
+        raise AdapterError("invalid token window configuration")
+    import tiktoken  # deferred: only needed when real splitting runs
 
-def chunk_structure(
-    parsed: ParsedDocument,
-    release_id: str,
-    version_field: str,
-) -> dict:
-    """Split-stage output: text, span, and metadata — no identities yet."""
+    encoding = tiktoken.get_encoding("cl100k_base")
+    tokens = encoding.encode(parsed.body)
+    offsets = token_char_offsets(parsed.body)
+    total = len(tokens)
+    step = size_tokens - overlap_tokens
     metadata = {
         "title": parsed.title,
         "status": parsed.status,
         version_field: parsed.front_matter.get(version_field, ""),
         "effective_date": parsed.front_matter.get("effective_date", ""),
     }
-    return {
-        "source_id": parsed.source_id,
-        "text": parsed.body,
-        "span": [parsed.body_start, parsed.body_end],
-        "content_sha256": parsed.content_sha256,
-        "score": 0.0,
-        "rank": 0,
-        "metadata": metadata,
-        "release_id": release_id,
-    }
+    structures: list[dict] = []
+    start = 0
+    while start < total or (start == 0 and total == 0):
+        end = min(start + size_tokens, total)
+        window_start = parsed.body_start + offsets[start]
+        window_end = parsed.body_start + (
+            offsets[end] if end < total else len(parsed.body)
+        )
+        structures.append(
+            {
+                "source_id": parsed.source_id,
+                "text": parsed.raw_text[window_start:window_end],
+                "span": [window_start, window_end],
+                "content_sha256": parsed.content_sha256,
+                "score": 0.0,
+                "rank": 0,
+                "metadata": dict(metadata),
+                "release_id": release_id,
+            }
+        )
+        if end >= total:
+            break
+        start += step
+    return structures
+
+
+def make_normalized_chunks(
+    parsed: ParsedDocument,
+    release_id: str,
+    version_field: str,
+    size_tokens: int = 200,
+    overlap_tokens: int = 40,
+) -> list[dict]:
+    """Split-stage + identity-stage output for one document: all windows."""
+    return [
+        assign_identity(structure)
+        for structure in token_window_structures(
+            parsed,
+            release_id,
+            version_field,
+            size_tokens=size_tokens,
+            overlap_tokens=overlap_tokens,
+        )
+    ]
 
 
 def assign_identity(structure: dict) -> dict:
@@ -342,19 +398,36 @@ class BaseAdapter(ABC):
             if corpus_manifest.get("schema_version") == 2  # type: ignore[attr-defined]
             else "policy_version"
         )
-        # split: chunk boundaries, text, spans, and metadata — no identities yet.
+        # split: real cl100k_base token windows per the declared chunking
+        # config — boundaries, text, spans, and metadata; no identities yet.
         started = time.perf_counter()
-        structures = [
-            chunk_structure(doc, release_id, version_field) for doc in documents
-        ]
+        chunking = self.config["chunking"]  # type: ignore[index]
+        size_tokens = int(chunking["chunk_size_tokens"])
+        overlap_tokens = int(chunking["chunk_overlap_tokens"])
+        structures: list[dict] = []
+        for doc in documents:
+            structures.extend(
+                token_window_structures(
+                    doc,
+                    release_id,
+                    version_field,
+                    size_tokens=size_tokens,
+                    overlap_tokens=overlap_tokens,
+                )
+            )
         split_ms = (time.perf_counter() - started) * 1000.0
         self._emit(
             trace,
             stage="split",
-            component="whole_document_token_window",
-            source_reference="corpus manifest chunk_plan",
+            component="token_window_cl100k_base",
+            source_reference="config/experiment.json chunking",
             duration_ms=split_ms,
-            resolved_config=dict(self.config["chunking"]),  # type: ignore[arg-type]
+            resolved_config={
+                "splitter": chunking["splitter"],
+                "tokenizer": chunking["tokenizer"],
+                "chunk_size_tokens": size_tokens,
+                "chunk_overlap_tokens": overlap_tokens,
+            },
             input_ids=[doc.source_id for doc in documents],
             output_ids=[structure["source_id"] for structure in structures],
             release_id=release_id,
