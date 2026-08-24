@@ -173,6 +173,7 @@ def test_stage_order_is_identical_across_frameworks(tmp_path):
         "rerank",
         "pack",
         "generate",
+        "citation",
     ]
     assert STAGE_ORDER == expected_query_stages
 

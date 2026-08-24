@@ -44,6 +44,7 @@ STAGE_ORDER = [
     "rerank",
     "pack",
     "generate",
+    "citation",
 ]
 
 FRONT_MATTER_PATTERN = re.compile(r"\A---\s*\n(.*?)\n---\s*\n?", re.DOTALL)
@@ -716,18 +717,41 @@ class BaseAdapter(ABC):
         )
 
         started = time.perf_counter()
-        answer, citations = self._generate(query_text, packed["packed"])
+        answer = self._generate(query_text, packed["packed"])
+        generate_ms = (time.perf_counter() - started) * 1000.0
         self._emit(
             trace,
             stage="generate",
             component=f"OllamaClient.generate({self.generation_model})",
             source_reference="config/experiment.json generation",
-            duration_ms=(time.perf_counter() - started) * 1000.0,
+            duration_ms=generate_ms,
             resolved_config=self.generation_options,
             input_ids=[c["chunk_id"] for c in packed["packed"]],
             output_ids=[],
-            metadata_delta={"citations": citations},
+            metadata_delta={"answer_chars": len(answer)},
             artifact_path="",
+            release_id=active_release,
+        )
+
+        # Citation extraction is its own observable stage: the model's [n]
+        # markers are parsed and resolved to contract-stable chunks here, so
+        # trace consumers can audit citation provenance independently of
+        # generation.
+        started = time.perf_counter()
+        citations = self.extract_citations(answer, packed["packed"])
+        self._emit(
+            trace,
+            stage="citation",
+            component="rag_compare.adapters.base.extract_citations",
+            source_reference="config/experiment.json context.citation_mode",
+            duration_ms=(time.perf_counter() - started) * 1000.0,
+            resolved_config={
+                "citation_mode": self.config["context"]["citation_mode"],  # type: ignore[index]
+                "marker_pattern": "[n] first-mention order",
+            },
+            input_ids=[c["chunk_id"] for c in packed["packed"]],
+            output_ids=[c["chunk_id"] for c in citations],
+            metadata_delta={"citations": citations},
             release_id=active_release,
         )
 
@@ -741,28 +765,35 @@ class BaseAdapter(ABC):
             "citations": citations,
         }
 
-    def _generate(self, query_text: str, packed: list[dict]) -> tuple[str, list[dict]]:
+    def _generate(self, query_text: str, packed: list[dict]) -> str:
         blocks = []
-        by_position = {}
         for position, chunk in enumerate(packed, start=1):
             blocks.append(
                 f"[{position}] source_id={chunk['source_id']} "
                 f"chunk_id={chunk['chunk_id']}\n{chunk['text']}"
             )
-            by_position[position] = chunk
         prompt = (
             f"{self.prompt_template}\n\nContext:\n"
             + "\n\n".join(blocks)
             + "\n\nQuestion: "
             + query_text
         )
-        answer = self.client.generate(
+        return self.client.generate(
             self.generation_model, prompt, **self.generation_options
         )
-        # Citations are model-derived: only blocks the answer actually cites
-        # (via [n] markers) become citations, in first-mention order. An
-        # answer citing nothing produces no citations, so downstream metrics
-        # measure what the model cited — not what was packed.
+
+    @staticmethod
+    def extract_citations(answer: str, packed: list[dict]) -> list[dict]:
+        """Resolve the model's [n] markers into contract-stable citations.
+
+        Citations are model-derived: only blocks the answer actually cites
+        become citations, in first-mention order. An answer citing nothing
+        produces no citations, so downstream metrics measure what the model
+        cited — not what was packed.
+        """
+        by_position = {
+            position: chunk for position, chunk in enumerate(packed, start=1)
+        }
         citations = []
         seen = set()
         for marker in re.findall(r"\[(\d+)\]", answer):
@@ -781,7 +812,7 @@ class BaseAdapter(ABC):
                     "release_id": chunk["release_id"],
                 }
             )
-        return answer, citations
+        return citations
 
     def _enforce_release(self, active_release, branches):
         from rag_compare.release import filter_chunks_for_release
