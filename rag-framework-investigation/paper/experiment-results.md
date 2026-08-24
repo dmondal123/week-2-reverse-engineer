@@ -10,10 +10,10 @@ Run ID: `task6-20260824T064738` (wall clock 26.787 s, status `passed` — contro
 
 | Condition | recall@k | MRR | citation span correctness (byte-verified) | citation source correctness | citation support | required-phrase coverage | mean citations/case | release consistency | retrieve ms | generate ms | total ms |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| llamaindex:bm25 | 1.0 | 0.90 | 1.00 | 1.00 | 0.73 | 0.80 | 1.0 | 1.0 | 3.3 | 1236.9 | 1240.3 |
-| llamaindex:ollama_dense | 1.0 | 0.90 | 1.00 | 1.00 | 0.73 | 0.80 | 1.2 | 1.0 | 22.9 | 1468.5 | 1491.5 |
 | haystack:bm25 | 1.0 | 0.87 | 1.00 | 1.00 | 0.73 | 0.73 | 1.0 | 1.0 | 11.4 | 1175.8 | 1187.3 |
 | haystack:ollama_dense | 1.0 | 0.90 | 1.00 | 1.00 | 0.73 | 0.80 | 1.2 | 1.0 | 27.2 | 1304.0 | 1331.3 |
+| llamaindex:bm25 | 1.0 | 0.90 | 1.00 | 1.00 | 0.73 | 0.80 | 1.0 | 1.0 | 3.3 | 1236.9 | 1240.3 |
+| llamaindex:ollama_dense | 1.0 | 0.90 | 1.00 | 1.00 | 0.73 | 0.80 | 1.2 | 1.0 | 22.9 | 1468.5 | 1491.5 |
 
 Full release manifests and chunk inventories are persisted at `artifacts/raw/task6-20260824T064738/<framework>/release-{v1,v2}/index/`.
 
@@ -31,13 +31,13 @@ Build-manifest SHA-256 is identical within each framework pair, so only `retriev
 
 Fact: the obsolete memo still outranks the current policy on the trap case for most conditions (MRR 0.333–0.5), yet every answer cites only correct sources (citation source correctness = 1.0 in all 20 case runs) and no forbidden source is ever cited — the prompt's citation discipline holds even when lexical ranking misleads.
 
-## C. Failure injection — both frameworks, runs `failure-injection-20260824T065054` (llamaindex) and `failure-injection-20260824T065107` (haystack)
+## C. Failure injection — both frameworks, runs `failure-injection-20260824T093551` (llamaindex) and `failure-injection-20260824T093605` (haystack)
 
 The identical partial-v2 promotion scenario was executed through each framework's adapter; every check below holds for BOTH frameworks (18/18 recorded assertions true; per-framework summaries at `artifacts/results/failure-injection-{llamaindex,haystack}.json`).
 
 | Check | Expected | Observed | Result |
 |---|---|---|---|
-| Partial v2 promotion (3 of 5 docs staged + indexed) | rejected by validation | error "corpus file set does not match the release directory" | ✅ |
+| Partial v2 promotion (3 of 5 docs staged + indexed) | rejected by validation | error "manifest query_contract does not match observed build" | ✅ |
 | Active pointer after failed promotion | byte-identical `{"release_id": "v1"}` | pointer unchanged | ✅ |
 | Phase A queries (release captured v1) | only v1 chunks, no v2 leakage | all returned_release_ids = ["v1"], no_mixed_release true, both retrievers | ✅ |
 | Mixed-release filter | raises on foreign chunk | `filter_chunks_for_release` raised MixedReleaseError | ✅ |
@@ -45,7 +45,7 @@ The identical partial-v2 promotion scenario was executed through each framework'
 | Phase B queries after promotion | only v2 chunks | all returned_release_ids = ["v2"] | ✅ |
 | Deleted v1 content (office-snacks) | never returned under v2 | absent from all Phase B contexts | ✅ |
 
-All 18 recorded assertions true — 9 per framework (runs `failure-injection-20260824T065054` llamaindex / `20260824T065107` haystack); traces preserved at `artifacts/raw/failure-injection-{llamaindex,haystack}-trace.jsonl` and `artifacts/raw/failure-injection-{llamaindex,haystack}-post-recovery-trace.jsonl`.
+All 18 recorded assertions true — 9 per framework (runs `failure-injection-20260824T093551` llamaindex / `failure-injection-20260824T093605` haystack); traces preserved at `artifacts/raw/failure-injection-{llamaindex,haystack}-trace.jsonl` and `artifacts/raw/failure-injection-{llamaindex,haystack}-post-recovery-trace.jsonl`.
 
 **New since remediation:** promotion now additionally validates a stored index artifact (`index/chunk-inventory.json`, hash-bound in the build manifest). Unit-level negative tests prove a release whose corpus files are complete but which stores **no inventory**, an **empty inventory**, or a **stale-ID inventory** cannot be validated (`tests/test_release.py`) — closing the original gap where validation proved corpus completeness but not index completeness. The partial-promotion rejection itself is still triggered first by the file-set check because the injected scenario stages exactly what it indexed; the decoupled failure modes are covered by the new unit tests.
 
