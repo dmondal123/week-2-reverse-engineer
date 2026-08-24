@@ -1,0 +1,88 @@
+{
+  "built_at": "2026-08-24T05:29:21+00:00",
+  "chunk_count": 5,
+  "chunker": {
+    "config_sha256": "27a013238d38b8c3e7d4d9c27cbe038c282b14c657b14eb3c3fdd9b0efcb790b",
+    "identity": "token_window_cl100k_base_v2",
+    "overlap": 40,
+    "size": 200
+  },
+  "corpus": {
+    "files": [
+      {
+        "path": "corpus/v2/approval-matrix.md",
+        "sha256": "a3c21e3bcf03699fa710d6bc826cb0c4035546e4b1b46fe934390e8edca8b774"
+      },
+      {
+        "path": "corpus/v2/contractor-scope.md",
+        "sha256": "e37e929a6e33b96bf01e6559732b4e5c70d92a0ef0c8a447614c1fdbf22a56d9"
+      },
+      {
+        "path": "corpus/v2/device-security.md",
+        "sha256": "ac817680d656142f72c5a22d1d66efc5a146c7aeb0810bd6d5fa8b47378ec2d0"
+      },
+      {
+        "path": "corpus/v2/finance-memo-obsolete.md",
+        "sha256": "f578eee6d5ad5f6e6a296aeb82cc649393ceb01a327bcc12b4b8ae29dc12fecc"
+      },
+      {
+        "path": "corpus/v2/travel-wifi-current.md",
+        "sha256": "5c97eeb468c1e52bb25c68ce0d3690236c93c889e6c617e9ead1b7a84acdb80b"
+      }
+    ],
+    "version": "v2"
+  },
+  "document_count": 5,
+  "embedding": {
+    "dimensions": 768,
+    "distance_metric": "cosine",
+    "name": "nomic-embed-text",
+    "ollama_digest": "21df13f11102db5f104e06ba3ae7b587d85b4e563e0cc9a603b7ace5dc26171c"
+  },
+  "framework": {
+    "adapter": "llamaindex_adapter",
+    "commit": "d8021225eb7e7b276d5ceb476b0a4650240f27f8",
+    "package": "llama-index-core"
+  },
+  "index": {
+    "chunk_count": 5,
+    "chunk_inventory_sha256": "6fd7c9b9ad562c627278c6f8585d377877426d6590cbc37ea4600f85867f948f"
+  },
+  "parser": {
+    "config": {},
+    "identity": "markdown_front_matter_v1"
+  },
+  "query_contract": {
+    "context": {
+      "budget_tokens": 1200,
+      "citation_mode": "source_id_and_chunk_id",
+      "packing_order": "retrieval_rank_then_chunk_id_asc"
+    },
+    "generation_model": "qwen3:4b-instruct-2507-q4_K_M",
+    "generation_ollama_id": "0edcdef34593",
+    "generation_options": {
+      "num_predict": 256,
+      "seed": 0,
+      "temperature": 0.0,
+      "top_p": 1.0
+    },
+    "prompt_sha256": "e029718bc4549c8c7cf270fefa7f245f0f0e50c49553c7882ec21394a731c50b",
+    "reranking": {
+      "enabled": false,
+      "method": "none",
+      "rerank_k": 3
+    },
+    "retrieval": {
+      "conditions": [
+        "bm25",
+        "ollama_dense"
+      ],
+      "score_order": "descending",
+      "tie_break_rule": "score_desc_then_chunk_id_asc",
+      "top_k": 5
+    }
+  },
+  "release_id": "v2",
+  "schema_version": 2,
+  "validation_status": "passed"
+}

@@ -6,14 +6,16 @@ Generated mechanically from `artifacts/results/controlled-summary.json`, `artifa
 
 ## A. Controlled 2×2 experiment — per-condition means (5 cases each)
 
-Run ID: `task6-20260823T203946` (wall clock 26.652 s, status `passed` — control validation AND quality gates).
+Run ID: `task6-20260824T052921` (wall clock 26.614 s, status `passed` — control validation AND quality gates).
 
-| Condition | recall@k | MRR | citation span correctness | citation source correctness | required-phrase coverage | mean citations/case | release consistency | retrieve ms | generate ms | total ms |
-|---|---|---|---|---|---|---|---|---|---|---|
-| llamaindex:bm25 | 1.0 | 0.90 | 1.00 | 1.00 | 0.80 | 1.0 | 1.0 | 4.1 | 1242.3 | 1246.4 |
-| llamaindex:ollama_dense | 1.0 | 0.90 | 1.00 | 1.00 | 0.80 | 1.2 | 1.0 | 20.8 | 1469.8 | 1490.6 |
-| haystack:bm25 | 1.0 | 0.87 | 1.00 | 1.00 | 0.73 | 1.0 | 1.0 | 9.1 | 1164.0 | 1173.2 |
-| haystack:ollama_dense | 1.0 | 0.90 | 1.00 | 1.00 | 0.80 | 1.2 | 1.0 | 25.1 | 1298.7 | 1323.9 |
+| Condition | recall@k | MRR | citation span correctness (byte-verified) | citation source correctness | citation support | required-phrase coverage | mean citations/case | release consistency | retrieve ms | generate ms | total ms |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| llamaindex:bm25 | 1.0 | 0.90 | 1.00 | 1.00 | 0.73 | 0.80 | 1.0 | 1.0 | 4.7 | 1232.2 | 1237.0 |
+| llamaindex:ollama_dense | 1.0 | 0.90 | 1.00 | 1.00 | 0.73 | 0.80 | 1.2 | 1.0 | 21.2 | 1458.9 | 1480.1 |
+| haystack:bm25 | 1.0 | 0.87 | 1.00 | 1.00 | 0.73 | 0.73 | 1.0 | 1.0 | 9.7 | 1164.0 | 1173.7 |
+| haystack:ollama_dense | 1.0 | 0.90 | 1.00 | 1.00 | 0.73 | 0.80 | 1.2 | 1.0 | 25.2 | 1295.2 | 1320.5 |
+
+Full release manifests and chunk inventories are persisted at `artifacts/raw/task6-20260824T052921/<framework>/release-{v1,v2}/`.
 
 Build-manifest SHA-256 is identical within each framework pair, so only `retriever_kind` and retriever-specific index data differ (`control_validation.failures = []`). Quality gates (frozen in `config/experiment.json` before the rerun): recall@k ≥ 0.5 per case, zero forbidden-source violations, release consistency 1.0 everywhere — all met.
 
@@ -29,7 +31,9 @@ Build-manifest SHA-256 is identical within each framework pair, so only `retriev
 
 Fact: the obsolete memo still outranks the current policy on the trap case for most conditions (MRR 0.333–0.5), yet every answer cites only correct sources (citation source correctness = 1.0 in all 20 case runs) and no forbidden source is ever cited — the prompt's citation discipline holds even when lexical ranking misleads.
 
-## C. Failure injection — run `failure-injection-20260823T203926`
+## C. Failure injection — both frameworks, runs `failure-injection-20260824T052837` (llamaindex) and `failure-injection-20260824T052850` (haystack)
+
+The identical partial-v2 promotion scenario was executed through each framework's adapter; every check below holds for BOTH frameworks (18/18 recorded assertions true; per-framework summaries at `artifacts/results/failure-injection-{llamaindex,haystack}.json`).
 
 | Check | Expected | Observed | Result |
 |---|---|---|---|
@@ -49,3 +53,4 @@ All 9 recorded assertions true; traces preserved at `artifacts/raw/failure-injec
 
 - **Limitation:** five cases, single repetition per condition, synthetic corpus, one local Ollama host; latencies are host-dependent.
 - **Observation:** required-phrase coverage 0.73–0.80 shows the generator sometimes omits an expected fact even when citing correctly — reported per case, not gated, pending diagnosis.
+- **Observation (new metric):** citation support 0.73 in every condition — the cited spans' source text does not always carry every required phrase, consistent with the coverage gap above; graded per case, not gated.

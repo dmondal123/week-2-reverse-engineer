@@ -1,0 +1,92 @@
+{
+  "built_at": "2026-08-24T05:29:21+00:00",
+  "chunk_count": 6,
+  "chunker": {
+    "config_sha256": "27a013238d38b8c3e7d4d9c27cbe038c282b14c657b14eb3c3fdd9b0efcb790b",
+    "identity": "token_window_cl100k_base_v2",
+    "overlap": 40,
+    "size": 200
+  },
+  "corpus": {
+    "files": [
+      {
+        "path": "corpus/v1/approval-matrix.md",
+        "sha256": "70a949a1731f5b650ca7b0269748e742033d35b1a02c0ea903013c6512343967"
+      },
+      {
+        "path": "corpus/v1/contractor-scope.md",
+        "sha256": "18c59cac99ff313e429fa217e57ee6fe058582dd77ac54d46e9e5de47da11cac"
+      },
+      {
+        "path": "corpus/v1/device-security.md",
+        "sha256": "c37f075d0600145578388714a0029253dd1d772cd343c3a56e05fc8c03e727f8"
+      },
+      {
+        "path": "corpus/v1/finance-memo-obsolete.md",
+        "sha256": "898ca1049e268916823c7fb356bd3b285fe3109b4c7f55931a922fe0fdcb2a04"
+      },
+      {
+        "path": "corpus/v1/office-snacks.md",
+        "sha256": "15cd7a4e29e6dfaa98074db11f05d5c6d67d2dc889d261160f78e0f2dec21b13"
+      },
+      {
+        "path": "corpus/v1/travel-wifi-current.md",
+        "sha256": "3f952dcfca07066380e0df55c8ab1d1ac9571ff2a46c6298e4e44167c1024acb"
+      }
+    ],
+    "version": "v1"
+  },
+  "document_count": 6,
+  "embedding": {
+    "dimensions": 768,
+    "distance_metric": "cosine",
+    "name": "nomic-embed-text",
+    "ollama_digest": "21df13f11102db5f104e06ba3ae7b587d85b4e563e0cc9a603b7ace5dc26171c"
+  },
+  "framework": {
+    "adapter": "haystack_adapter",
+    "commit": "c7cb46c0f28ad1984f60e5d3e9404b124a221437",
+    "package": "haystack-ai"
+  },
+  "index": {
+    "chunk_count": 6,
+    "chunk_inventory_sha256": "75d8e2d7a9569f3f0405d02d42d1437ab428accfd993bca4541242a074998c69"
+  },
+  "parser": {
+    "config": {},
+    "identity": "markdown_front_matter_v1"
+  },
+  "query_contract": {
+    "context": {
+      "budget_tokens": 1200,
+      "citation_mode": "source_id_and_chunk_id",
+      "packing_order": "retrieval_rank_then_chunk_id_asc"
+    },
+    "generation_model": "qwen3:4b-instruct-2507-q4_K_M",
+    "generation_ollama_id": "0edcdef34593",
+    "generation_options": {
+      "num_predict": 256,
+      "seed": 0,
+      "temperature": 0.0,
+      "top_p": 1.0
+    },
+    "prompt_sha256": "e029718bc4549c8c7cf270fefa7f245f0f0e50c49553c7882ec21394a731c50b",
+    "reranking": {
+      "enabled": false,
+      "method": "none",
+      "rerank_k": 3
+    },
+    "retrieval": {
+      "conditions": [
+        "bm25",
+        "ollama_dense"
+      ],
+      "score_order": "descending",
+      "tie_break_rule": "score_desc_then_chunk_id_asc",
+      "top_k": 5
+    }
+  },
+  "release_id": "v1",
+  "schema_version": 1,
+  "validation_status": "passed"
+}
