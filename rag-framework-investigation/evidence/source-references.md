@@ -79,16 +79,16 @@ Line numbers refer to the working trees at exactly these commits.
 `haystack/test/components/writers/test_document_writer.py` — exercises `DocumentWriter.run` policies against in-memory stores (HS-1/HS-2).
 
 ### REF-T3 LlamaIndex vector-store retriever tests
-`llama-index-core/tests/indices/vector_store/test_retrievers.py` — covers retriever construction/top-k behavior over vector stores (LI-8).
+`llama_index/llama-index-core/tests/indices/vector_store/test_retrievers.py` — covers retriever construction/top-k behavior over vector stores (LI-8).
 
 ### REF-T4 LlamaIndex Settings documentation-by-code (configuration)
 `llama-index-core/llama_index/core/settings.py:20` — docstring "Settings for the Llama Index, lazily initialized" plus property setters define the entire configuration surface that must be snapshotted in stage events.
 
 ### REF-T5 Haystack release-note history (history/reference)
-`haystack/releasenotes/notes/*.yaml` (e.g., `adapt-gpt-generator-bb7f52bd67f6b197.yaml`) — the project's history shows components renamed/reworked across 2.x/3.x lines, evidencing that adapter code must be pinned to SHAs rather than "current API".
+`haystack/releasenotes/notes/change-metadata-to-meta-0fada93f04628c79.yaml:3-5` — "Rename `metadata` to `meta`" / "Rename `metadata_fields_to_embed` to `meta_fields_to_embed` in all Embedders"; `haystack/releasenotes/notes/agent-exit-conditions-d8ffd979d961cd6d.yaml:5` — "The init parameter has been renamed from exit_condition to exit_conditions"; `haystack/releasenotes/notes/adapt-gpt-generator-bb7f52bd67f6b197.yaml:3-5` — GPTGenerator adapted to string input/output. These exact release notes show component APIs renamed/reworked across 2.x/3.x lines, evidencing that adapter code must be pinned to SHAs rather than "current API".
 
 ### REF-T6 LlamaIndex changelog history (history/reference)
-`llama_index/CHANGELOG.md` @ d8021225 — records breaking changes across core releases (service_context removal → global `Settings`), supporting the design driver that ambient configuration is a deliberate trade-off for usability, and a known migration hazard.
+`llama_index/CHANGELOG.md:10326` @ d8021225 — "removed deprecated `ServiceContext` -- using this now will print an error with a link to the migration guide" (breaking changes across core releases: service_context removal → global `Settings`), supporting the design driver that ambient configuration is a deliberate trade-off for usability, and a known migration hazard.
 
 ## E. Coverage summary
 
