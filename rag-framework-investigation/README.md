@@ -41,27 +41,49 @@ Expected: a numeric embedding vector and a non-thinking "OK" response. The serve
 
 ## 3. Framework repositories at pinned SHAs
 
-The adapters call public APIs verified at exact commits (`config/repository-manifest.json`):
+The adapters call public APIs verified at exact commits (`config/repository-manifest.json`). Clone
+into the sibling-of-parent location recorded in the manifest (`portable_path` = `../../<repo>`
+relative to this project root), so the checkout lands next to the assignment workspace:
 
 ```bash
-git clone https://github.com/run-llama/llama_index.git ../llama_index
-git clone https://github.com/deepset-ai/haystack.git ../haystack
-git -C ../llama_index checkout d8021225eb7e7b276d5ceb476b0a4650240f27f8
-git -C ../haystack    checkout c7cb46c0f28ad1984f60e5d3e9404b124a221437
+git clone https://github.com/run-llama/llama_index.git ../../llama_index
+git clone https://github.com/deepset-ai/haystack.git ../../haystack
+git -C ../../llama_index checkout d8021225eb7e7b276d5ceb476b0a4650240f27f8
+git -C ../../haystack    checkout c7cb46c0f28ad1984f60e5d3e9404b124a221437
 ```
+
+The checked-out SHAs must match `commit_sha` in `config/repository-manifest.json` exactly.
 
 ## 4. Dependency installation
 
 ```bash
 .venv/bin/pip install -e '.[dev,frameworks]'   # includes tiktoken + requests (direct deps of the shared layer)
-.venv/bin/pip install -e '../llama_index'      # llama-index core + integrations
-.venv/bin/pip install -e '../haystack'         # haystack-ai
+.venv/bin/pip install -e '../../llama_index'   # llama-index core + integrations
+.venv/bin/pip install -e '../../haystack'      # haystack-ai
 ```
 
 Verify imports resolve inside `.venv` only:
 
 ```bash
 .venv/bin/python -c 'import llama_index, haystack, requests, tiktoken; print("imports-ok")'
+```
+
+### Tokenizer cache warm-up
+
+Chunking uses the `cl100k_base` encoding via tiktoken. On first use tiktoken downloads the BPE
+vocabulary from openaipublic.blob.core.windows.net and caches it locally. Warm the cache once while
+online so experiment runs never need network access for tokenization:
+
+```bash
+.venv/bin/python -c "import tiktoken; tiktoken.get_encoding('cl100k_base'); print('tokenizer-cache-ok')"
+```
+
+For fully offline or air-gapped reruns, pin the cache to a project-local directory and copy it with
+the workspace (set the variable for every subsequent run):
+
+```bash
+export TIKTOKEN_CACHE_DIR="$(pwd)/.tiktoken-cache"
+.venv/bin/python -c "import tiktoken; tiktoken.get_encoding('cl100k_base')"
 ```
 
 ## 5. Unit tests
