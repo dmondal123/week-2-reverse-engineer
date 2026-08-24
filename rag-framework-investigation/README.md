@@ -53,8 +53,7 @@ git -C ../haystack    checkout c7cb46c0f28ad1984f60e5d3e9404b124a221437
 ## 4. Dependency installation
 
 ```bash
-.venv/bin/pip install -e '.[dev,frameworks]'
-.venv/bin/pip install requests                 # used by rag_compare.ollama
+.venv/bin/pip install -e '.[dev,frameworks]'   # includes tiktoken + requests (direct deps of the shared layer)
 .venv/bin/pip install -e '../llama_index'      # llama-index core + integrations
 .venv/bin/pip install -e '../haystack'         # haystack-ai
 ```
@@ -62,7 +61,7 @@ git -C ../haystack    checkout c7cb46c0f28ad1984f60e5d3e9404b124a221437
 Verify imports resolve inside `.venv` only:
 
 ```bash
-.venv/bin/python -c 'import llama_index, haystack, requests; print("imports-ok")'
+.venv/bin/python -c 'import llama_index, haystack, requests, tiktoken; print("imports-ok")'
 ```
 
 ## 5. Unit tests

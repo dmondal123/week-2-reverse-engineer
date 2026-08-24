@@ -57,18 +57,27 @@ ALLOWED_FILES = [
     "artifacts/raw/pip-freeze.txt",
     "artifacts/raw/failure-injection-trace.jsonl",
     "artifacts/raw/failure-injection-post-recovery-trace.jsonl",
+    # canonical per-framework failure-injection traces (Task 7 rev, both adapters)
+    "artifacts/raw/failure-injection-llamaindex-trace.jsonl",
+    "artifacts/raw/failure-injection-llamaindex-post-recovery-trace.jsonl",
+    "artifacts/raw/failure-injection-haystack-trace.jsonl",
+    "artifacts/raw/failure-injection-haystack-post-recovery-trace.jsonl",
     "scripts/freeze_environment.sh",
 ]
 
 ALLOWED_DIRS = [
     "src/rag_compare",           # package source (recursed)
+    "scripts",                   # packaging + experiment scripts (incl. this file)
     "tests",                     # test suites
     "corpus/v1",                 # corpus + manifests
     "corpus/v2",
     "corpus/v1/manifest.json",
     "corpus/v2/manifest.json",
     "artifacts/results",         # sanitized result summaries
-    # canonical controlled run (paper-cited)
+    # canonical paper-cited controlled run (insights-paper.md / experiment-results.md)
+    "artifacts/raw/task6-20260824T052921",
+    # superseded controlled runs (pre-remediation lineage)
+    "artifacts/raw/task6-20260823T190633",
     "artifacts/raw/task6-20260823T202231",
     # clean-shell reproduction run (Task 9 verification)
     "artifacts/raw/task6-20260823T203946",
@@ -93,6 +102,13 @@ REQUIRED_MEMBERS = [
     "corpus/v2/manifest.json",
     "artifacts/results/controlled-summary.json",
     "artifacts/results/failure-injection.json",
+    # every artifact referenced by the canonical summaries/paper
+    "scripts/package_submission.py",
+    "artifacts/raw/task6-20260824T052921",
+    "artifacts/raw/failure-injection-llamaindex-trace.jsonl",
+    "artifacts/raw/failure-injection-llamaindex-post-recovery-trace.jsonl",
+    "artifacts/raw/failure-injection-haystack-trace.jsonl",
+    "artifacts/raw/failure-injection-haystack-post-recovery-trace.jsonl",
 ]
 
 # Prohibited path fragments — hard reject.
@@ -182,7 +198,13 @@ def verify_zip() -> dict:
         if zf.testzip() is not None:
             failures.append("testzip() reported a corrupt member")
 
-        missing = [name for name in REQUIRED_MEMBERS if name not in names]
+        def member_present(required: str) -> bool:
+            # Directories match by prefix; files must appear exactly.
+            if required in names:
+                return True
+            return any(name.startswith(f"{required}/") for name in names)
+
+        missing = [name for name in REQUIRED_MEMBERS if not member_present(name)]
         if missing:
             failures.append(f"required members missing: {missing}")
 

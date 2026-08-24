@@ -12,11 +12,10 @@ sequenceDiagram
     participant Q as Query caller
 
     rect rgb(235, 245, 255)
-    Note over C,R: Index-time — release boundary first (immutable namespace + validated manifest)
+    Note over C,R: Index-time — staging namespace created, index built, THEN validated at promotion
     C->>R: corpus files + manifest.json (source_id, hashes)
-    R->>R: validate_release: file set, SHA-256 hashes, counts, schema, embedding identity, QUERY CONTRACT (retriever/rerank/packing/generator/prompt/options) + stored chunk inventory recomputed from corpus bytes (release.py)
+    R->>R: stage_release: copy corpus into immutable staging namespace; write chunk inventory + release manifest
     SHARED->>SHARED: parse + real cl100k_base token-window split (200/40) + identity contract (src/rag_compare/adapters/base.py, tests/test_chunking.py)
-    R-->>R: staging namespace immutable until promoted
 
     alt LlamaIndex index path
         R->>LI: build_release(corpus_path, manifest, trace)
@@ -27,8 +26,9 @@ sequenceDiagram
         HI->>HI: chunks indexed verbatim as Documents (id/text/embedding/meta from contract); no framework-native splitting (HS-1/HS-2 DuplicatePolicy.FAIL)
     end
 
+    R->>R: validate_release: file set, SHA-256 hashes, counts, schema, embedding identity, QUERY CONTRACT (retriever/rerank/packing/generator/prompt/options) + stored chunk inventory recomputed from corpus bytes (release.py)
     R->>R: promote_release: validate staging == manifest, then ONE atomic os.replace of active pointer
-    Note over R: Failed validation never touches active.json (Task 7 rev: partial v2 rejected on BOTH adapters, pointer stayed {"release_id": "v1"})
+    R-->>R: failed validation never touches active.json (Task 7 rev: partial v2 rejected on BOTH adapters, pointer stayed {"release_id": "v1"})
     end
 
     rect rgb(240, 255, 240)

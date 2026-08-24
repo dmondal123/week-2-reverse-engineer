@@ -7,7 +7,11 @@ name = "rag-compare"
 version = "0.1.0"
 description = "LlamaIndex vs Haystack investigation: shared contracts, tracing, and immutable release mechanism"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    # Direct imports of the shared (framework-independent) layer:
+    "tiktoken>=0.7",       # cl100k_base token-window splitter (adapters/base.py)
+    "requests>=2.31",      # Ollama HTTP client (ollama.py)
+]
 
 [project.optional-dependencies]
 dev = [
