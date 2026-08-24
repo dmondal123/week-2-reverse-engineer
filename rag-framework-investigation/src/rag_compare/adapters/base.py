@@ -125,6 +125,10 @@ class BuildResult:
     manifest: dict
     observed: BuildArtifacts
     chunks: list[dict] = field(default_factory=list)
+    # Chunks read BACK from the framework's own store after the store stage.
+    # The release inventory is derived from these, not from the in-memory
+    # input chunks, so validation proves what the index actually holds.
+    stored_chunks: list[dict] = field(default_factory=list)
 
 
 def parse_front_matter(raw_text: str) -> tuple[dict, int, int]:
@@ -486,8 +490,30 @@ class BaseAdapter(ABC):
 
         started = time.perf_counter()
         store_stage_callback(chunks, release_id)
+        # Read the stored contents back OUT of the framework's own store and
+        # build the inventory from those, so the manifest hash binds to what
+        # is actually queryable, not merely to what was handed to the writer.
+        stored_chunks = self.read_back_stored_chunks(release_id)
+        expected_ids = sorted(chunk["chunk_id"] for chunk in chunks)
+        stored_ids = sorted(chunk["chunk_id"] for chunk in stored_chunks)
+        if stored_ids != expected_ids:
+            raise AdapterError(
+                "stored-index read-back does not match the built chunks: "
+                f"expected {len(expected_ids)} chunks, read back "
+                f"{len(stored_ids)} (missing="
+                f"{sorted(set(expected_ids) - set(stored_ids))}, extra="
+                f"{sorted(set(stored_ids) - set(expected_ids))})"
+            )
+        input_by_id = {chunk["chunk_id"]: chunk for chunk in chunks}
+        for stored in stored_chunks:
+            original = input_by_id[stored["chunk_id"]]
+            if stored["text"] != original["text"]:
+                raise AdapterError(
+                    "stored text differs from built text for chunk "
+                    f"{stored['chunk_id']}"
+                )
         store_ms = (time.perf_counter() - started) * 1000.0
-        inventory_entries = build_chunk_inventory(chunks)
+        inventory_entries = build_chunk_inventory(stored_chunks)
         inventory_sha256 = hashlib.sha256(
             canonical_inventory_bytes(inventory_entries)
         ).hexdigest()
@@ -552,7 +578,10 @@ class BaseAdapter(ABC):
             index=manifest["index"],
             query_contract=manifest["query_contract"],
         )
-        return BuildResult(manifest=manifest, observed=observed, chunks=chunks)
+        return BuildResult(
+            manifest=manifest, observed=observed, chunks=chunks,
+            stored_chunks=stored_chunks,
+        )
 
     def _assemble_manifest(
         self,
@@ -874,6 +903,15 @@ class BaseAdapter(ABC):
 
     @abstractmethod
     def build_release(self, corpus_path, manifest, trace) -> BuildResult: ...
+
+    @abstractmethod
+    def read_back_stored_chunks(self, release_id: str) -> list[dict]:
+        """Read every stored chunk of a release back from the framework store.
+
+        Each entry carries chunk_id, source_id, document_id, span and text as
+        actually persisted by the framework, so the release inventory can be
+        derived from real index contents rather than in-memory inputs.
+        """
 
     @abstractmethod
     def retrieve_candidates(

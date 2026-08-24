@@ -75,6 +75,8 @@ ALLOWED_DIRS = [
     "corpus/v2/manifest.json",
     "artifacts/results",         # sanitized result summaries
     # canonical paper-cited controlled run (insights-paper.md / experiment-results.md)
+    "artifacts/raw/task6-20260824T064738",
+    # prior post-review rerun retained for the reproduction-exactness claim
     "artifacts/raw/task6-20260824T052921",
     # superseded controlled runs (pre-remediation lineage)
     "artifacts/raw/task6-20260823T190633",
@@ -104,6 +106,7 @@ REQUIRED_MEMBERS = [
     "artifacts/results/failure-injection.json",
     # every artifact referenced by the canonical summaries/paper
     "scripts/package_submission.py",
+    "artifacts/raw/task6-20260824T064738",
     "artifacts/raw/task6-20260824T052921",
     "artifacts/raw/failure-injection-llamaindex-trace.jsonl",
     "artifacts/raw/failure-injection-llamaindex-post-recovery-trace.jsonl",

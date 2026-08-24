@@ -12,7 +12,7 @@ We needed a production answer to two questions: (1) which RAG framework should o
 
 1. LlamaIndex resolves embed model, LLM, chunk size, top-k, and callbacks from a lazily-initialized global singleton unless overridden everywhere (EV-T4-002, EV-T4-003, EV-T4-004, EV-T4-005, EV-T4-007/LI-7). This is a documented usability trade-off with recorded migration hazards in its changelog (REF-T6).
 2. Haystack's explicit pipeline graph makes component boundaries observable (EV-T4-010), and its defaults are constructor-local and inspectable (EV-T4-009), but its splitter regenerates child document identities from content+embedding fingerprints and drops parent ids (EV-T4-007, EV-T4-008) — counterevidence against assuming graph visibility prevents identity drift.
-3. Neither framework has any native concept of an immutable, validated, atomically-promoted corpus release: provenance matrix rows for `corpus_release_version` are "lost" at index-time for both; Haystack offers only DuplicatePolicy (HS-2).
+3. Neither framework has any native concept of an immutable, validated, atomically-promoted corpus release: provenance matrix rows for `corpus_version` and `release_id` are "lost" at index-time for both; Haystack offers only DuplicatePolicy (HS-2).
 4. Controlled runtime results show no retrieval-quality difference between frameworks under fixed configuration (recall 1.0, MRR 0.87–0.90 across all four conditions); generation dominates latency (~95–99% of total).
 
 ## Considered alternatives

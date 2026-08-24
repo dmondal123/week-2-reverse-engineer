@@ -317,7 +317,11 @@ def main(argv: list[str] | None = None) -> int:
                     json.dumps(result.manifest, indent=2, sort_keys=True) + "\n",
                     encoding="utf-8",
                 )
-                inventory_entries = build_chunk_inventory(result.chunks)
+                # Persist the inventory derived from the READ-BACK stored
+                # chunks (identical to result.stored_chunks used for the
+                # manifest hash), so the persisted artifact proves what the
+                # framework index actually holds.
+                inventory_entries = build_chunk_inventory(result.stored_chunks)
                 (build_dir / INDEX_INVENTORY_RELPATH).parent.mkdir(
                     parents=True, exist_ok=True
                 )

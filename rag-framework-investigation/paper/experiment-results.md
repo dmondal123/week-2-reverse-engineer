@@ -31,7 +31,7 @@ Build-manifest SHA-256 is identical within each framework pair, so only `retriev
 
 Fact: the obsolete memo still outranks the current policy on the trap case for most conditions (MRR 0.333–0.5), yet every answer cites only correct sources (citation source correctness = 1.0 in all 20 case runs) and no forbidden source is ever cited — the prompt's citation discipline holds even when lexical ranking misleads.
 
-## C. Failure injection — both frameworks, runs `failure-injection-20260824T052837` (llamaindex) and `failure-injection-20260824T052850` (haystack)
+## C. Failure injection — both frameworks, runs `failure-injection-20260824T065054` (llamaindex) and `failure-injection-20260824T065107` (haystack)
 
 The identical partial-v2 promotion scenario was executed through each framework's adapter; every check below holds for BOTH frameworks (18/18 recorded assertions true; per-framework summaries at `artifacts/results/failure-injection-{llamaindex,haystack}.json`).
 
@@ -45,7 +45,7 @@ The identical partial-v2 promotion scenario was executed through each framework'
 | Phase B queries after promotion | only v2 chunks | all returned_release_ids = ["v2"] | ✅ |
 | Deleted v1 content (office-snacks) | never returned under v2 | absent from all Phase B contexts | ✅ |
 
-All 18 recorded assertions true — 9 per framework (runs `failure-injection-20260824T052837` llamaindex / `20260824T052850` haystack); traces preserved at `artifacts/raw/failure-injection-{llamaindex,haystack}-trace.jsonl` and `artifacts/raw/failure-injection-{llamaindex,haystack}-post-recovery-trace.jsonl`.
+All 18 recorded assertions true — 9 per framework (runs `failure-injection-20260824T065054` llamaindex / `20260824T065107` haystack); traces preserved at `artifacts/raw/failure-injection-{llamaindex,haystack}-trace.jsonl` and `artifacts/raw/failure-injection-{llamaindex,haystack}-post-recovery-trace.jsonl`.
 
 **New since remediation:** promotion now additionally validates a stored index artifact (`index/chunk-inventory.json`, hash-bound in the build manifest). Unit-level negative tests prove a release whose corpus files are complete but which stores **no inventory**, an **empty inventory**, or a **stale-ID inventory** cannot be validated (`tests/test_release.py`) — closing the original gap where validation proved corpus completeness but not index completeness. The partial-promotion rejection itself is still triggered first by the file-set check because the injected scenario stages exactly what it indexed; the decoupled failure modes are covered by the new unit tests.
 

@@ -107,6 +107,54 @@ def test_both_adapters_implement_shared_contract():
 
 @pytest.mark.parametrize("adapter_cls", [LlamaIndexAdapter, HaystackAdapter])
 @needs_ollama
+def test_inventory_is_derived_from_store_read_back(tmp_path, adapter_cls):
+    """The release inventory must reflect real index contents, not inputs."""
+    from rag_compare.release import build_chunk_inventory
+
+    adapter = adapter_cls(CONFIG, LLAMA_COMMIT, "pkg")
+    result, _trace = build_v1(adapter, tmp_path)
+
+    # stored_chunks come from the framework's own store after the write.
+    assert result.stored_chunks, "no chunks read back from the store"
+    assert sorted(c["chunk_id"] for c in result.stored_chunks) == sorted(
+        c["chunk_id"] for c in result.chunks
+    )
+    input_by_id = {c["chunk_id"]: c for c in result.chunks}
+    for stored in result.stored_chunks:
+        original = input_by_id[stored["chunk_id"]]
+        assert stored["text"] == original["text"]
+        assert stored["source_id"] == original["source_id"]
+        assert stored["document_id"] == original["document_id"]
+        assert stored["span"] == original["span"]
+
+    # The manifest hash covers exactly the read-back inventory.
+    from rag_compare.release import canonical_inventory_bytes
+
+    digest = identity.sha256_bytes(
+        canonical_inventory_bytes(build_chunk_inventory(result.stored_chunks))
+    )
+    assert result.manifest["index"]["chunk_inventory_sha256"] == digest
+
+    # Tampering with the store AFTER build must be detectable: drop a chunk
+    # from the underlying store and re-deriving the inventory diverges.
+    if adapter_cls is HaystackAdapter:
+        store = adapter._stores[result.manifest["release_id"]]["store"]
+        victim = next(iter(store.storage))
+        del store.storage[victim]
+    else:
+        docstore = adapter._indexes[result.manifest["release_id"]]["index"].docstore
+        victim = next(iter(docstore.docs))
+        docstore.delete_document(victim)
+    tampered = adapter.read_back_stored_chunks(result.manifest["release_id"])
+    assert len(tampered) == len(result.stored_chunks) - 1
+    tampered_digest = identity.sha256_bytes(
+        canonical_inventory_bytes(build_chunk_inventory(tampered))
+    )
+    assert tampered_digest != result.manifest["index"]["chunk_inventory_sha256"]
+
+
+@pytest.mark.parametrize("adapter_cls", [LlamaIndexAdapter, HaystackAdapter])
+@needs_ollama
 def test_build_release_produces_validatable_manifest(tmp_path, adapter_cls):
     from rag_compare.release import validate_release
 

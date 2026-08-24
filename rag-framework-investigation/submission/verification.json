@@ -6,8 +6,8 @@
     "testzip": "passed"
   },
   "failures": [],
-  "member_count": 715,
+  "member_count": 850,
   "status": "passed",
   "zip_path": "submission/rag-framework-investigation.zip",
-  "zip_sha256": "f49ebf9ea211c7ca21d48e1e1963ca721d1badd3bbb76188ec6ecdaae06bd755"
+  "zip_sha256": "04747c3f1d29b2f54ec785553c9f2a96bca5abd2a79d7fdd79ee6e5d74ae2466"
 }

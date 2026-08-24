@@ -127,6 +127,28 @@ class LlamaIndexAdapter(BaseAdapter):
             corpus_path, manifest, trace, embed_stage, store_stage, release_id
         )
 
+    def read_back_stored_chunks(self, release_id: str) -> list[dict]:
+        """Enumerate nodes stored in the index's own docstore for a release."""
+        namespace = self._indexes.get(release_id)
+        if namespace is None:
+            raise ReleaseNamespaceError(release_id)
+        docstore = namespace["index"].docstore
+        entries = []
+        for node_id in sorted(docstore.docs):
+            node = docstore.docs[node_id]
+            metadata = node.metadata
+            span = metadata.get("span", [0, 0])
+            entries.append(
+                {
+                    "chunk_id": node.node_id,
+                    "source_id": metadata["source_id"],
+                    "document_id": metadata["document_id"],
+                    "span": list(span),
+                    "text": node.get_content(),
+                }
+            )
+        return entries
+
 
     # ---- retrieval -------------------------------------------------------------
 

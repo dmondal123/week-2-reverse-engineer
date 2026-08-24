@@ -113,6 +113,23 @@ class HaystackAdapter(BaseAdapter):
             corpus_path, manifest, trace, embed_stage, store_stage, release_id
         )
 
+    def read_back_stored_chunks(self, release_id: str) -> list[dict]:
+        """Enumerate the InMemoryDocumentStore contents for a release."""
+        namespace = self._stores.get(release_id)
+        if namespace is None:
+            raise ReleaseNamespaceError(release_id)
+        documents = namespace["store"].filter_documents()
+        return [
+            {
+                "chunk_id": document.id,
+                "source_id": document.meta["source_id"],
+                "document_id": document.meta["document_id"],
+                "span": list(document.meta["span"]),
+                "text": document.content or "",
+            }
+            for document in documents
+        ]
+
     # ---- query -----------------------------------------------------------------
 
     def drop_release(self, release_id: str) -> None:
