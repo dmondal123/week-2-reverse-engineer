@@ -58,8 +58,8 @@ The checked-out SHAs must match `commit_sha` in `config/repository-manifest.json
 
 ```bash
 .venv/bin/pip install -e '.[dev,frameworks]'   # includes tiktoken + requests (direct deps of the shared layer)
-.venv/bin/pip install -e '../../llama_index'   # llama-index core + integrations
-.venv/bin/pip install -e '../../haystack'      # haystack-ai
+.venv/bin/pip install -e 'vendoes/llama_index'   # llama-index core + integrations
+.venv/bin/pip install -e 'vendors/haystack'      # haystack-ai
 ```
 
 Verify imports resolve inside `.venv` only:
