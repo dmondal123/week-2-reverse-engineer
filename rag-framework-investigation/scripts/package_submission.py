@@ -157,7 +157,7 @@ DENYLIST_FRAGMENTS = (
     "credential",
     "secret",
     "token.txt",
-    "vendor/",
+    "vendors/",
     "dist/",
     "build/",
     ".egg-info",

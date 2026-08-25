@@ -34,8 +34,8 @@ done
 
 echo "[repositories]"
 for spec in \
-    "haystack|$investigation_root/vendor/haystack|$repository_root/haystack" \
-    "llama_index|$investigation_root/vendor/llama_index|$repository_root/llama_index"; do
+    "haystack|$investigation_root/vendors/haystack|$investigation_root/../haystack" \
+    "llama_index|$investigation_root/vendors/llama_index|$investigation_root/../llama_index"; do
     IFS='|' read -r name portable current <<<"$spec"
     path=
     for candidate in "$portable" "$current"; do

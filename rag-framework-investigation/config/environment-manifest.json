@@ -57,13 +57,13 @@
       {
         "name": "haystack",
         "version": "3.2.0rc0",
-        "source_path": "../../haystack",
+        "source_path": "vendors/haystack",
         "commit_sha": "c7cb46c0f28ad1984f60e5d3e9404b124a221437"
       },
       {
         "name": "llama-index-core",
         "version": "0.14.24",
-        "source_path": "../../llama_index",
+        "source_path": "vendors/llama_index",
         "commit_sha": "d8021225eb7e7b276d5ceb476b0a4650240f27f8"
       }
     ],

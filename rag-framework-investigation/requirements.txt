@@ -1,8 +1,8 @@
 # Requirements mirror of pyproject.toml (kept in sync by hand).
 # Install with the repository's documented flow instead of this file alone:
 #   pip install -e '.[dev,frameworks]'
-#   pip install -e ../../llama_index   # pinned clone, see config/repository-manifest.json
-#   pip install -e ../../haystack      # pinned clone, see config/repository-manifest.json
+#   pip install -e vendors/llama_index   # pinned clone, see config/repository-manifest.json
+#   pip install -e vendors/haystack      # pinned clone, see config/repository-manifest.json
 
 # Direct imports of the shared framework-independent layer (src/rag_compare):
 tiktoken>=0.7          # cl100k_base token-window splitter (adapters/base.py)

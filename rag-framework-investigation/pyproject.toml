@@ -19,8 +19,8 @@ dev = [
     "ruff>=0.6",
 ]
 frameworks = [
-    # Pinned framework cores are installed editable from ../../llama_index and
-    # ../../haystack (see config/repository-manifest.json). These are the extra
+    # Pinned framework cores are installed editable from vendors/llama_index and
+    # vendors/haystack (see config/repository-manifest.json). These are the extra
     # retrieval integrations required by both adapters (Task 5), pinned to
     # the versions installed in .venv.
     "llama-index-retrievers-bm25==0.7.1",

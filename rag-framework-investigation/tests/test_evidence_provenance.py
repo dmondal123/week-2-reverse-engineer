@@ -18,6 +18,8 @@ import csv
 import re
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 
 SCAN_FILES = sorted(
@@ -90,13 +92,14 @@ def test_every_cited_run_id_exists_in_artifacts():
 
 
 def test_source_reference_files_exist_on_disk():
-    """Paths in source-references.md resolve against the assignment root
-    (the pinned framework clones live next to rag-framework-investigation/)."""
-    repo_root = ROOT.parent.parent
+    """Paths in source-references.md resolve against the vendored clones
+    under ``vendors/`` inside this project root."""
+    if not (ROOT / "vendors").is_dir():
+        pytest.skip("vendors/ clones not present; run README sections 3-4")
     text = (ROOT / "evidence" / "source-references.md").read_text(encoding="utf-8")
     missing = [
         rel
         for rel in sorted(set(SOURCE_FILE_RE.findall(text)))
-        if not (repo_root / rel).is_file() and not (ROOT / rel).is_file()
+        if not (ROOT / "vendors" / rel).is_file() and not (ROOT / rel).is_file()
     ]
     assert not missing, f"Source references point to missing files: {missing}"

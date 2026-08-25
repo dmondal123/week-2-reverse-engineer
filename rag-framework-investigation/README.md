@@ -42,14 +42,14 @@ Expected: a numeric embedding vector and a non-thinking "OK" response. The serve
 ## 3. Framework repositories at pinned SHAs
 
 The adapters call public APIs verified at exact commits (`config/repository-manifest.json`). Clone
-into the sibling-of-parent location recorded in the manifest (`portable_path` = `../../<repo>`
-relative to this project root), so the checkout lands next to the assignment workspace:
+into the vendored location recorded in the manifest (`portable_path` = `vendors/<repo>` relative to
+this project root):
 
 ```bash
-git clone https://github.com/run-llama/llama_index.git ../../llama_index
-git clone https://github.com/deepset-ai/haystack.git ../../haystack
-git -C ../../llama_index checkout d8021225eb7e7b276d5ceb476b0a4650240f27f8
-git -C ../../haystack    checkout c7cb46c0f28ad1984f60e5d3e9404b124a221437
+git clone https://github.com/run-llama/llama_index.git vendors/llama_index
+git clone https://github.com/deepset-ai/haystack.git vendors/haystack
+git -C vendors/llama_index checkout d8021225eb7e7b276d5ceb476b0a4650240f27f8
+git -C vendors/haystack    checkout c7cb46c0f28ad1984f60e5d3e9404b124a221437
 ```
 
 The checked-out SHAs must match `commit_sha` in `config/repository-manifest.json` exactly.

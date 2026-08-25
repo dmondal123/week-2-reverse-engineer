@@ -8,8 +8,8 @@
       "default_branch": "main",
       "commit_sha": "c7cb46c0f28ad1984f60e5d3e9404b124a221437",
       "license_path": "LICENSE",
-      "current_local_path": "../../haystack",
-      "portable_path": "../../haystack",
+      "current_local_path": "vendors/haystack",
+      "portable_path": "vendors/haystack",
       "verification_status": "verified via git rev-parse / git remote on local clone"
     },
     {
@@ -18,8 +18,8 @@
       "default_branch": "main",
       "commit_sha": "d8021225eb7e7b276d5ceb476b0a4650240f27f8",
       "license_path": "LICENSE",
-      "current_local_path": "../../llama_index",
-      "portable_path": "../../llama_index",
+      "current_local_path": "vendors/llama_index",
+      "portable_path": "vendors/llama_index",
       "verification_status": "verified via git rev-parse / git remote on local clone"
     }
   ]
